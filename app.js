@@ -73,7 +73,16 @@ document.getElementById('signOutBtn').addEventListener('click',async()=>{
   document.getElementById('loginPw').value='';showLogin();
 });
 document.getElementById('exportBtn').addEventListener('click',()=>{closeUserMenu();exportBackup();});
-document.getElementById('importBtn').addEventListener('click',()=>{closeUserMenu();/* Task 4 接上导入 */});
+document.getElementById('importBtn').addEventListener('click',()=>{
+  closeUserMenu();
+  const inp=document.getElementById('importFile');
+  inp.value=''; // 允许重复选同一文件
+  inp.click();
+});
+document.getElementById('importFile').addEventListener('change',(e)=>{
+  const f=e.target.files&&e.target.files[0];
+  if(f) importBackup(f);
+});
 document.getElementById('googleBtn').addEventListener('click',async()=>{
   setMsg('跳转到 Google…');
   const back=window.location.href.split('#')[0].split('?')[0];
@@ -228,4 +237,41 @@ function exportBackup(){
   document.body.appendChild(a); a.click(); a.remove();
   setTimeout(()=>URL.revokeObjectURL(url),100);
   showToast('已导出备份文件 ⬇');
+}
+
+function importBackup(file){
+  const reader=new FileReader();
+  reader.onload=()=>{
+    let data;
+    try{ data=JSON.parse(reader.result); }
+    catch(e){ showToast('文件格式不对，导入失败'); return; }
+    if(!data || typeof data!=='object' ||
+       !(Array.isArray(data.favorites)||Array.isArray(data.customs)||Array.isArray(data.cart))){
+      showToast('文件格式不对，导入失败'); return;
+    }
+    let addedF=0, addedC=0, addedK=0;
+    // 收藏：按菜名并集
+    (Array.isArray(data.favorites)?data.favorites:[]).forEach(n=>{
+      if(typeof n==='string' && !favs.has(n)){ favs.add(n); addedF++; }
+    });
+    // 自定义菜：按 id 去重追加
+    const ids=new Set(customRecipes.map(c=>c.id));
+    (Array.isArray(data.customs)?data.customs:[]).forEach(c=>{
+      if(c && c.id!=null && !ids.has(c.id)){ customRecipes.push(c); ids.add(c.id); addedC++; }
+    });
+    // 清单：按 text 去重（沿用 addCartItem），新项 done=false
+    (Array.isArray(data.cart)?data.cart:[]).forEach(it=>{
+      if(it && typeof it.text==='string'){
+        const before=cart.length;
+        addCartItem(it.text);
+        if(cart.length>before) addedK++;
+      }
+    });
+    persist();
+    render(currentFilter);
+    renderCart();
+    showToast(`已导入：收藏 +${addedF}，自定义菜 +${addedC}，清单 +${addedK}`);
+  };
+  reader.onerror=()=>showToast('文件读取失败');
+  reader.readAsText(file);
 }
