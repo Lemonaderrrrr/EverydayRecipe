@@ -272,11 +272,11 @@ function importBackup(file){
         ids.add(c.id); addedC++;
       }
     });
-    // 清单：按 text 去重（沿用 addCartItem），新项 done=false
+    // 清单：按 text 去重（沿用 addCartItem），新项 done=false；清洗防止 HTML 注入
     (Array.isArray(data.cart)?data.cart:[]).forEach(it=>{
       if(it && typeof it.text==='string'){
         const before=cart.length;
-        addCartItem(it.text);
+        addCartItem(stripTags(it.text));
         if(cart.length>before) addedK++;
       }
     });
