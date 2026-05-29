@@ -211,6 +211,45 @@ document.getElementById('setLogout').addEventListener('click',async()=>{
   syncDot.textContent='';document.getElementById('loginPw').value='';showLogin();
 });
 
+/* ====== 菜谱码导出/导入 ====== */
+function encodeRecipes(arr){return 'ERX1:'+btoa(unescape(encodeURIComponent(JSON.stringify(arr))));}
+function decodeRecipes(code){
+  const m=String(code).trim();
+  if(!m.startsWith('ERX1:'))throw new Error('bad');
+  const arr=JSON.parse(decodeURIComponent(escape(atob(m.slice(5)))));
+  if(!Array.isArray(arr))throw new Error('bad');
+  return arr;
+}
+const aiCode=document.getElementById('aiCode'),aiShareStatus=document.getElementById('aiShareStatus');
+document.getElementById('aiExport').addEventListener('click',()=>{
+  if(customRecipes.length===0){aiShareStatus.textContent=tr('aiExportEmpty');return;}
+  aiCode.value=encodeRecipes(customRecipes);aiShareStatus.textContent='';aiCode.focus();aiCode.select();
+});
+document.getElementById('aiCopy').addEventListener('click',async()=>{
+  if(!aiCode.value)return;
+  try{await navigator.clipboard.writeText(aiCode.value);}catch(e){aiCode.focus();aiCode.select();}
+  aiShareStatus.textContent=tr('aiCopied');
+});
+document.getElementById('aiDoImport').addEventListener('click',()=>{
+  let arr;
+  try{arr=decodeRecipes(aiCode.value);}catch(e){aiShareStatus.textContent=tr('aiImportBad');return;}
+  let added=0;
+  arr.forEach(o=>{
+    if(!o||typeof o!=='object'||!o.name)return;
+    const ing=o.ing||'';
+    if(customRecipes.some(x=>x.name===o.name&&x.ing===ing))return;
+    let p=(Array.isArray(o.p)?o.p:[]).filter(x=>PSET.includes(x));if(p.length===0)p=['tofu'];
+    customRecipes.unshift({id:'c'+Date.now()+Math.floor(Math.random()*1000),cat:'custom',sub:o.sub||'AI 生成',sub_en:o.sub_en||'AI generated',flag:'⭐',name:o.name,en:o.en||'',p,ing,ing_en:o.ing_en||'',custom:true});
+    added++;
+  });
+  if(added===0){aiShareStatus.textContent=tr('aiImportEmpty');return;}
+  saveCustom();
+  document.querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));document.querySelector('[data-filter="all"]').classList.add('active');
+  render('all');
+  aiShareStatus.textContent=trf('aiImportDone',added);
+  aiCode.value='';
+});
+
 /* ====== AI 一句话加菜 ====== */
 async function aiGenerate(){
   const desc=aiInput.value.trim();if(!desc)return;

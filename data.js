@@ -209,4 +209,13 @@ const UI = {
   setAccount:{zh:'账号', en:'Account'},
   setLang:{zh:'语言', en:'Language'},
   setShare:{zh:'菜谱分享', en:'Share recipes'},
+  aiExport:{zh:'导出我的菜谱', en:'Export my recipes'},
+  aiCopy:{zh:'复制', en:'Copy'},
+  aiDoImport:{zh:'确认导入', en:'Import'},
+  phCode:{zh:'菜谱码会显示在这里 / 把别人的码粘贴到这里', en:'Code appears here / paste a shared code here'},
+  aiCopied:{zh:'✓ 已复制到剪贴板', en:'✓ Copied to clipboard'},
+  aiExportEmpty:{zh:'你还没有 AI 生成的菜谱', en:'You have no AI recipes yet'},
+  aiImportBad:{zh:'菜谱码无效，请检查后重试', en:'Invalid code, please check and retry'},
+  aiImportEmpty:{zh:'没有可导入的新菜谱', en:'No new recipes to import'},
+  aiImportDone:{zh:'✓ 导入了 {n} 道菜', en:'✓ Imported {n} recipes'},
 };
