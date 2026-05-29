@@ -211,21 +211,21 @@ function showToast(msg){
 
 /* ====== 导出 / 导入备份 ====== */
 function exportBackup(){
+  const d=new Date();
   const payload={
     app:'EverydayRecipe',
     version:1,
-    exportedAt:new Date().toISOString(),
+    exportedAt:d.toISOString(),
     favorites:[...favs],
     customs:customRecipes,
     cart:cart
   };
   const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
   const url=URL.createObjectURL(blob);
-  const d=new Date();
   const stamp=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
   const a=document.createElement('a');
   a.href=url; a.download=`everydayrecipe-backup-${stamp}.json`;
   document.body.appendChild(a); a.click(); a.remove();
-  URL.revokeObjectURL(url);
+  setTimeout(()=>URL.revokeObjectURL(url),100);
   showToast('已导出备份文件 ⬇');
 }
