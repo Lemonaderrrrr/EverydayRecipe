@@ -34,7 +34,7 @@ async function loadData(){
 async function onAuthed(session){
   userId=session.user.id;userEmail=session.user.email;
   document.getElementById('userName').textContent=userEmail;
-  document.getElementById('userChip').style.display='inline-flex';
+  document.getElementById('userMenu').style.display='inline-flex';
   document.getElementById('loginOverlay').classList.add('hidden');
   await loadData();
   renderCart();render('all');
@@ -61,11 +61,19 @@ document.getElementById('signUpBtn').addEventListener('click',async()=>{
   if(data.session){onAuthed(data.session);}
   else{setMsg('注册成功！如开启了邮箱确认，请先去邮箱点确认链接，再回来登录。',false);}
 });
-document.getElementById('userChip').addEventListener('click',async()=>{
+const userDropdown=document.getElementById('userDropdown');
+function closeUserMenu(){userDropdown.hidden=true;}
+function toggleUserMenu(){userDropdown.hidden=!userDropdown.hidden;}
+document.getElementById('userChip').addEventListener('click',(e)=>{e.stopPropagation();toggleUserMenu();});
+document.addEventListener('click',(e)=>{if(!e.target.closest('#userMenu'))closeUserMenu();});
+document.getElementById('signOutBtn').addEventListener('click',async()=>{
+  closeUserMenu();
   await sb.auth.signOut();userId=null;userEmail=null;favs=new Set();customRecipes=[];cart=[];
-  document.getElementById('userChip').style.display='none';syncDot.textContent='';
+  document.getElementById('userMenu').style.display='none';syncDot.textContent='';
   document.getElementById('loginPw').value='';showLogin();
 });
+document.getElementById('exportBtn').addEventListener('click',()=>{closeUserMenu();/* Task 3 接上导出 */});
+document.getElementById('importBtn').addEventListener('click',()=>{closeUserMenu();/* Task 4 接上导入 */});
 document.getElementById('googleBtn').addEventListener('click',async()=>{
   setMsg('跳转到 Google…');
   const back=window.location.href.split('#')[0].split('?')[0];

@@ -33,7 +33,15 @@
     <h1>全球<span class="accent">快餐</span>大全</h1>
     <p class="subtitle">9 大类 × 子类细分 · 蛋白质筛选 · 收藏 · AI 加菜 · 云同步</p>
     <div class="header-rule"></div>
-    <button class="user-chip" id="userChip" style="display:none">👤 <span id="userName"></span> · 退出</button>
+    <div class="user-menu" id="userMenu" style="display:none">
+      <button class="user-chip" id="userChip">👤 <span id="userName"></span> <span class="chip-caret">▾</span></button>
+      <div class="user-dropdown" id="userDropdown" hidden>
+        <button class="udd-item" id="exportBtn">⬇ 导出备份</button>
+        <button class="udd-item" id="importBtn">⬆ 导入备份</button>
+        <button class="udd-item udd-danger" id="signOutBtn">退出登录</button>
+      </div>
+    </div>
+    <input type="file" id="importFile" accept="application/json,.json" hidden>
     <div class="sync-dot" id="syncDot"></div>
     <div class="dice-zone">
       <button class="dice-btn" id="diceBtn">🎲 今天吃啥？随机选一道</button>
