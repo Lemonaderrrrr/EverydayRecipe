@@ -88,7 +88,6 @@ function highlightCard(name){
     <div class="set-label" data-i18n="setShare">菜谱分享</div>
     <div class="ai-share-row">
       <button class="ghost" id="aiExport" data-i18n="aiExport">导出我的菜谱</button>
-      <button class="ghost" id="aiImport" data-i18n="aiImport">导入菜谱码</button>
     </div>
     <textarea class="ai-code" id="aiCode" data-i18n-ph="phCode" placeholder="菜谱码会显示在这里 / 把别人的码粘贴到这里" rows="3"></textarea>
     <div class="ai-share-actions">
@@ -130,7 +129,7 @@ function decodeRecipes(code){
 
 **UI 字典(data.js `UI`)新增双语键:**
 - 设置面板:`settingsAria`、`settingsTitle`、`setAccount`、`setLang`、`setShare`。(`logout` 键已存在,复用作「退出登录」。)
-- 分享:`aiExport`、`aiImport`、`aiCopy`、`aiDoImport`、`phCode`、`aiCopied`、`aiExportEmpty`、`aiImportBad`、`aiImportEmpty`、`aiImportDone`(带 `{n}` 占位)。
+- 分享:`aiExport`、`aiCopy`、`aiDoImport`、`phCode`、`aiCopied`、`aiExportEmpty`、`aiImportBad`、`aiImportEmpty`、`aiImportDone`(带 `{n}` 占位)。
 
 **styles.css 新增:** `.settings-fab`(固定右上角,样式对称于 `.cart-fab` 右下角)、`.set-sec`、`.set-label`、`.set-account`、`.ai-share-row`、`.ai-code`、`.ai-share-actions`、`.ai-share-status`(沿用现有 panel 风格)。
 
