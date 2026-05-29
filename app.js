@@ -239,6 +239,8 @@ function exportBackup(){
   showToast('已导出备份文件 ⬇');
 }
 
+function stripTags(s){ return String(s).replace(/<[^>]*>/g,''); }
+
 function importBackup(file){
   const reader=new FileReader();
   reader.onload=()=>{
@@ -254,10 +256,21 @@ function importBackup(file){
     (Array.isArray(data.favorites)?data.favorites:[]).forEach(n=>{
       if(typeof n==='string' && !favs.has(n)){ favs.add(n); addedF++; }
     });
-    // 自定义菜：按 id 去重追加
+    // 自定义菜：按 id 去重追加（校验结构 + 清洗字符串，防止导入文件注入 HTML）
     const ids=new Set(customRecipes.map(c=>c.id));
     (Array.isArray(data.customs)?data.customs:[]).forEach(c=>{
-      if(c && c.id!=null && !ids.has(c.id)){ customRecipes.push(c); ids.add(c.id); addedC++; }
+      if(c && c.id!=null && !ids.has(c.id) && typeof c.name==='string' && Array.isArray(c.p)){
+        customRecipes.push({
+          ...c,
+          name:stripTags(c.name),
+          en:stripTags(c.en||''),
+          ing:stripTags(c.ing||''),
+          flag:stripTags(c.flag||''),
+          sub:stripTags(c.sub||''),
+          p:c.p.filter(x=>typeof x==='string').map(stripTags)
+        });
+        ids.add(c.id); addedC++;
+      }
     });
     // 清单：按 text 去重（沿用 addCartItem），新项 done=false
     (Array.isArray(data.cart)?data.cart:[]).forEach(it=>{
