@@ -72,7 +72,7 @@ document.getElementById('signOutBtn').addEventListener('click',async()=>{
   document.getElementById('userMenu').style.display='none';syncDot.textContent='';
   document.getElementById('loginPw').value='';showLogin();
 });
-document.getElementById('exportBtn').addEventListener('click',()=>{closeUserMenu();/* Task 3 接上导出 */});
+document.getElementById('exportBtn').addEventListener('click',()=>{closeUserMenu();exportBackup();});
 document.getElementById('importBtn').addEventListener('click',()=>{closeUserMenu();/* Task 4 接上导入 */});
 document.getElementById('googleBtn').addEventListener('click',async()=>{
   setMsg('跳转到 Google…');
@@ -207,4 +207,25 @@ function showToast(msg){
   el.textContent=msg; el.classList.add('show');
   clearTimeout(_toastT);
   _toastT=setTimeout(()=>el.classList.remove('show'),2600);
+}
+
+/* ====== 导出 / 导入备份 ====== */
+function exportBackup(){
+  const payload={
+    app:'EverydayRecipe',
+    version:1,
+    exportedAt:new Date().toISOString(),
+    favorites:[...favs],
+    customs:customRecipes,
+    cart:cart
+  };
+  const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const d=new Date();
+  const stamp=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  const a=document.createElement('a');
+  a.href=url; a.download=`everydayrecipe-backup-${stamp}.json`;
+  document.body.appendChild(a); a.click(); a.remove();
+  URL.revokeObjectURL(url);
+  showToast('已导出备份文件 ⬇');
 }
