@@ -56,13 +56,14 @@ function saveCart(){persist();}
 async function syncUp(){
   if(!userId)return;
   syncDot.textContent=tr('syncing');
-  const {error}=await sb.from('user_data').upsert({user_id:userId,favorites:[...favs],customs:customRecipes,cart:cart,updated_at:new Date().toISOString()});
+  const {error}=await sb.from('user_data').upsert({user_id:userId,favorites:[...favs],customs:customRecipes,cart:cart,lang:lang,updated_at:new Date().toISOString()});
   syncDot.textContent=error?(tr('syncFail')+error.message):tr('synced');
   setTimeout(()=>{if(syncDot.textContent.startsWith('✓'))syncDot.textContent='';},1800);
 }
 async function loadData(){
-  const {data,error}=await sb.from('user_data').select('favorites,customs,cart').eq('user_id',userId).maybeSingle();
-  if(data){favs=new Set(data.favorites||[]);customRecipes=data.customs||[];cart=data.cart||[];}
+  const {data,error}=await sb.from('user_data').select('favorites,customs,cart,lang').eq('user_id',userId).maybeSingle();
+  if(data){favs=new Set(data.favorites||[]);customRecipes=data.customs||[];cart=data.cart||[];
+    if(data.lang==='zh'||data.lang==='en'){lang=data.lang;localStorage.setItem('lang',lang);document.documentElement.lang=(lang==='en')?'en':'zh-CN';applyUI();}}
   else{favs=new Set();customRecipes=[];cart=[];await syncUp();}
 }
 
