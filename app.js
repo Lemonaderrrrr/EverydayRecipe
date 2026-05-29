@@ -190,3 +190,13 @@ aiInput.addEventListener('keydown',e=>{if(e.key==='Enter')aiGenerate();});
   const {data:{session}}=await sb.auth.getSession();
   if(session&&session.user){onAuthed(session);}else{showLogin();}
 })();
+
+/* ====== 轻量 toast ====== */
+let _toastT;
+function showToast(msg){
+  const el=document.getElementById('toast');
+  if(!el)return;
+  el.textContent=msg; el.classList.add('show');
+  clearTimeout(_toastT);
+  _toastT=setTimeout(()=>el.classList.remove('show'),2600);
+}
