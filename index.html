@@ -65,7 +65,10 @@
   .cat-desc{color:var(--ink-soft);font-size:.84rem;margin:4px 0 2px;}
   .sub-label{font-weight:700;font-size:.82rem;letter-spacing:.1em;color:var(--persimmon-deep);margin:18px 0 2px;border-left:3px solid var(--persimmon);padding-left:9px;}
 
-  .card{background:var(--paper);border:1px solid var(--line);border-radius:13px;margin-top:11px;padding:14px 15px;box-shadow:0 2px 8px rgba(70,45,20,.04);}
+  .card{background:var(--paper);border:1px solid var(--line);border-radius:13px;padding:14px 15px;box-shadow:0 2px 8px rgba(70,45,20,.04);display:flex;flex-direction:column;}
+  .card-grid{display:grid;grid-template-columns:1fr;gap:11px;margin-top:11px;}
+  @media(min-width:640px) and (max-width:999px){ .card-grid{grid-template-columns:repeat(2,1fr);} }
+  @media(min-width:1000px){ .wrap{max-width:1120px;} .card-grid{grid-template-columns:repeat(3,1fr);} }
   .card.flash{animation:flash 1.4s ease;}
   @keyframes flash{0%{box-shadow:0 0 0 4px rgba(217,83,30,.45);}100%{box-shadow:0 2px 8px rgba(70,45,20,.04);}}
   .card-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;}
@@ -76,7 +79,7 @@
   .ptag{font-size:.68rem;font-weight:500;padding:2px 7px;border-radius:50px;background:#f0e6d4;color:#8a6a2e;white-space:nowrap;}
   .ing{margin-top:9px;font-size:.88rem;}
   .ing .lab{color:var(--persimmon);font-weight:700;font-size:.72rem;letter-spacing:.06em;margin-right:4px;}
-  .card-actions{margin-top:10px;display:flex;flex-wrap:wrap;gap:7px;}
+  .card-actions{margin-top:auto;padding-top:10px;display:flex;flex-wrap:wrap;gap:7px;}
   .act-btn{font-size:.78rem;font-weight:500;padding:6px 12px;border-radius:50px;cursor:pointer;border:1.5px solid transparent;display:inline-flex;align-items:center;gap:5px;transition:all .18s;font-family:inherit;}
   .act-cart{background:#e4eed8;color:var(--leaf);}
   .act-cart:hover,.act-cart.added{background:var(--leaf);color:#fff;}
@@ -451,7 +454,7 @@ function render(filter){
     label.innerHTML=`<span class="em">${c.em}</span>${c.name}<span class="count">${items.length} 种</span>`;list.appendChild(label);
     const d=document.createElement('p');d.className='cat-desc';d.textContent=c.desc;list.appendChild(d);
     const subs=[];items.forEach(r=>{if(!subs.includes(r.sub))subs.push(r.sub);});
-    subs.forEach(sub=>{const sl=document.createElement('div');sl.className='sub-label';sl.textContent=sub;list.appendChild(sl);items.filter(r=>r.sub===sub).forEach(r=>list.appendChild(makeCard(r)));});
+    subs.forEach(sub=>{const sl=document.createElement('div');sl.className='sub-label';sl.textContent=sub;list.appendChild(sl);const grid=document.createElement('div');grid.className='card-grid';items.filter(r=>r.sub===sub).forEach(r=>grid.appendChild(makeCard(r)));list.appendChild(grid);});
   });
   if(!any && filter!=='fav') list.innerHTML='<p class="empty">这个蛋白质下暂时没有菜，换一个试试 🍳</p>';
 }
