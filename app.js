@@ -70,8 +70,6 @@ async function loadData(){
 
 async function onAuthed(session){
   userId=session.user.id;userEmail=session.user.email;
-  document.getElementById('userName').textContent=userEmail;
-  document.getElementById('userChip').style.display='inline-flex';
   document.getElementById('loginOverlay').classList.add('hidden');
   await loadData();
   renderCart();render('all');
@@ -97,11 +95,6 @@ document.getElementById('signUpBtn').addEventListener('click',async()=>{
   if(error){setMsg(tr('signUpFail')+error.message,true);return;}
   if(data.session){onAuthed(data.session);}
   else{setMsg(tr('signUpOk'),false);}
-});
-document.getElementById('userChip').addEventListener('click',async()=>{
-  await sb.auth.signOut();userId=null;userEmail=null;favs=new Set();customRecipes=[];cart=[];
-  document.getElementById('userChip').style.display='none';syncDot.textContent='';
-  document.getElementById('loginPw').value='';showLogin();
 });
 document.getElementById('googleBtn').addEventListener('click',async()=>{
   setMsg(tr('googleRedirect'));
@@ -207,6 +200,16 @@ const aiOv=document.getElementById('aiOverlay'),aiP=document.getElementById('aiP
 document.getElementById('aiOpen').addEventListener('click',()=>{if(!userId){showLogin();return;}openPanel(aiOv,aiP);setTimeout(()=>aiInput.focus(),50);});
 document.getElementById('aiClose').addEventListener('click',()=>closePanel(aiOv,aiP));
 aiOv.addEventListener('click',()=>closePanel(aiOv,aiP));
+/* ====== 设置面板 ====== */
+const setOv=document.getElementById('settingsOverlay'),setP=document.getElementById('settingsPanel');
+document.getElementById('settingsFab').addEventListener('click',()=>{document.getElementById('setEmail').textContent=userEmail||'';openPanel(setOv,setP);});
+document.getElementById('settingsClose').addEventListener('click',()=>closePanel(setOv,setP));
+setOv.addEventListener('click',()=>closePanel(setOv,setP));
+document.getElementById('setLogout').addEventListener('click',async()=>{
+  closePanel(setOv,setP);
+  await sb.auth.signOut();userId=null;userEmail=null;favs=new Set();customRecipes=[];cart=[];
+  syncDot.textContent='';document.getElementById('loginPw').value='';showLogin();
+});
 
 /* ====== AI 一句话加菜 ====== */
 async function aiGenerate(){

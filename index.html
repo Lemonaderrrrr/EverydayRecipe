@@ -33,8 +33,6 @@
     <h1 data-i18n-html="h1">全球<span class="accent">快餐</span>大全</h1>
     <p class="subtitle" data-i18n="subtitle">9 大类 × 子类细分 · 蛋白质筛选 · 收藏 · AI 加菜 · 云同步</p>
     <div class="header-rule"></div>
-    <div class="lang-toggle"><button data-lang="zh">中</button><button data-lang="en">EN</button></div>
-    <button class="user-chip" id="userChip" style="display:none">👤 <span id="userName"></span> · <span data-i18n="logout">退出</span></button>
     <div class="sync-dot" id="syncDot"></div>
     <div class="dice-zone">
       <button class="dice-btn" id="diceBtn" data-i18n="dice">🎲 今天吃啥？随机选一道</button>
@@ -62,6 +60,7 @@
 </div>
 
 <button class="cart-fab" id="cartFab" data-i18n-aria="cartAria" aria-label="买菜清单">🛒<span class="cart-badge" id="cartBadge">0</span></button>
+<button class="settings-fab" id="settingsFab" data-i18n-aria="settingsAria" aria-label="设置">⚙️</button>
 
 <div class="ov" id="cartOverlay"></div>
 <div class="panel" id="cartPanel">
@@ -77,6 +76,35 @@
   <div class="p-add-row"><input class="p-input" id="aiInput" type="text" data-i18n-ph="phAi" placeholder="一句话描述，例：韩式甜辣炸鸡" autocomplete="off"><button class="p-go" id="aiGo">→</button></div>
   <div class="ai-status" id="aiStatus" data-i18n="aiStatusDefault">输入一道菜的描述，AI 会自动生成材料和蛋白质标签，加入「⭐ 我的菜谱」并云端同步。</div>
   <div class="ai-note" data-i18n="aiNote">注：AI 加菜已通过 Supabase 后端代理支持线上使用（需登录）。生成的菜谱会加入「⭐ 我的菜谱」并云端同步。</div>
+</div>
+
+<div class="ov" id="settingsOverlay"></div>
+<div class="panel" id="settingsPanel">
+  <div class="p-head"><div class="p-title" data-i18n="settingsTitle">⚙️ 设置</div><button class="p-close" id="settingsClose">✕</button></div>
+
+  <div class="set-sec">
+    <div class="set-label" data-i18n="setAccount">账号</div>
+    <div class="set-account"><span id="setEmail"></span></div>
+    <button class="ghost" id="setLogout" data-i18n="logout">退出</button>
+  </div>
+
+  <div class="set-sec">
+    <div class="set-label" data-i18n="setLang">语言</div>
+    <div class="lang-toggle"><button data-lang="zh">中</button><button data-lang="en">EN</button></div>
+  </div>
+
+  <div class="set-sec">
+    <div class="set-label" data-i18n="setShare">菜谱分享</div>
+    <div class="ai-share-row">
+      <button class="ghost" id="aiExport" data-i18n="aiExport">导出我的菜谱</button>
+    </div>
+    <textarea class="ai-code" id="aiCode" data-i18n-ph="phCode" placeholder="菜谱码会显示在这里 / 把别人的码粘贴到这里" rows="3"></textarea>
+    <div class="ai-share-actions">
+      <button class="ghost" id="aiCopy" data-i18n="aiCopy">复制</button>
+      <button class="primary" id="aiDoImport" data-i18n="aiDoImport">确认导入</button>
+    </div>
+    <div class="ai-share-status" id="aiShareStatus"></div>
+  </div>
 </div>
 
 <script src="data.js"></script>

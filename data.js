@@ -204,4 +204,9 @@ const UI = {
   aiAdded:{zh:'已加入「⭐ 我的菜谱」：{n}', en:'Added to ⭐ My Recipes: {n}'},
   aiNetErr:{zh:'网络错误，请稍后再试', en:'Network error, try again later'},
   cartAria:{zh:'买菜清单', en:'Shopping list'},
+  settingsAria:{zh:'设置', en:'Settings'},
+  settingsTitle:{zh:'⚙️ 设置', en:'⚙️ Settings'},
+  setAccount:{zh:'账号', en:'Account'},
+  setLang:{zh:'语言', en:'Language'},
+  setShare:{zh:'菜谱分享', en:'Share recipes'},
 };
