@@ -28,8 +28,6 @@
   h1 .accent{color:var(--persimmon);}
   .subtitle{margin-top:13px;color:var(--ink-soft);font-size:.92rem;max-width:33ch;margin-inline:auto;}
   .header-rule{width:54px;height:3px;background:var(--persimmon);margin:18px auto 0;border-radius:2px;}
-  .user-chip{display:inline-flex;align-items:center;gap:6px;margin-top:14px;background:var(--paper);border:1.5px solid var(--line);border-radius:50px;padding:5px 14px;font-size:.82rem;color:var(--ink-soft);cursor:pointer;font-family:inherit;}
-  .user-chip:hover{border-color:var(--persimmon);color:var(--persimmon);}
   .lang-toggle{display:inline-flex;gap:0;border:1px solid var(--persimmon,#e06a3c);border-radius:999px;overflow:hidden;margin:6px auto 0;}
   .lang-toggle button{border:none;background:transparent;color:var(--persimmon,#e06a3c);font:inherit;font-size:13px;padding:3px 12px;cursor:pointer;}
   .lang-toggle button.on{background:var(--persimmon,#e06a3c);color:#fff;}
