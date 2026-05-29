@@ -167,12 +167,20 @@ aiOv.addEventListener('click',()=>closePanel(aiOv,aiP));
 /* ====== AI 一句话加菜 ====== */
 async function aiGenerate(){
   const desc=aiInput.value.trim();if(!desc)return;
+  const {data:{session}}=await sb.auth.getSession();
+  if(!session){showLogin();return;}
   aiStatus.textContent='正在生成「'+desc+'」…';
   try{
-    const resp=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1000,messages:[{role:"user",content:`根据这句话描述一道菜，只输出一个 JSON 对象，不要任何多余文字或 markdown 代码块。字段：name(中文菜名), en(英文或拼音名), type(中文小分类，如 炸物/盖饭/汤面/卷类/甜品/小吃), p(数组，从这些蛋白质里选适用的：pork,chicken,beef,sea,egg,tofu；纯素或主要是淀粉就用 ["tofu"]), ing(中文主要材料，用顿号、分隔，6到10样)。描述：${desc}`}]})});
-    const data=await resp.json();
-    let text=(data.content||[]).map(b=>b.text||'').join('').trim().replace(/```json/g,'').replace(/```/g,'').trim();
-    const obj=JSON.parse(text);
+    const resp=await fetch(`${SUPABASE_URL}/functions/v1/ai-recipe`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token,'apikey':SUPABASE_KEY},
+      body:JSON.stringify({desc})
+    });
+    if(!resp.ok){
+      aiStatus.textContent=resp.status===401?'登录已过期，请重新登录':'AI 生成失败，请换个描述再试';
+      return;
+    }
+    const obj=await resp.json();
     let p=(Array.isArray(obj.p)?obj.p:[]).filter(x=>PSET.includes(x));if(p.length===0)p=['tofu'];
     const rec={id:'c'+Date.now(),cat:'custom',sub:obj.type||'AI 生成',flag:'⭐',name:obj.name||desc,en:obj.en||'',p,ing:obj.ing||'',custom:true};
     customRecipes.unshift(rec);saveCustom();
@@ -180,7 +188,7 @@ async function aiGenerate(){
     document.querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));document.querySelector('[data-filter="all"]').classList.add('active');
     render('all');closePanel(aiOv,aiP);
     setTimeout(()=>{const card=[...document.querySelectorAll('.card')].find(c=>c.dataset.name===rec.name);if(card){card.classList.add('flash');card.scrollIntoView({behavior:'smooth',block:'center'});setTimeout(()=>card.classList.remove('flash'),1400);}},150);
-  }catch(e){aiStatus.textContent='生成失败：网络不可用（部署到 GitHub Pages 或本地文件时无法调用 AI）。请在 Claude 预览里使用此功能。';}
+  }catch(e){aiStatus.textContent='网络错误，请稍后再试';}
 }
 document.getElementById('aiGo').addEventListener('click',aiGenerate);
 aiInput.addEventListener('keydown',e=>{if(e.key==='Enter')aiGenerate();});
