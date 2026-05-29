@@ -167,12 +167,19 @@ function render(filter){
 }
 document.getElementById('filters').addEventListener('click',e=>{if(!e.target.classList.contains('chip'))return;document.querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));e.target.classList.add('active');render(e.target.dataset.filter);});
 
+function highlightCard(name){
+  const card=[...document.querySelectorAll('.card')].find(c=>c.dataset.name===name);
+  if(!card)return;
+  card.classList.add('picked');
+  card.scrollIntoView({behavior:'smooth',block:'center'});
+  setTimeout(()=>card.classList.remove('picked'),3000);
+}
 const diceResult=document.getElementById('diceResult');
 document.getElementById('diceBtn').addEventListener('click',()=>{
   document.querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));document.querySelector('[data-filter="all"]').classList.add('active');render('all');
   const pool=allRecipes();const pick=pool[Math.floor(Math.random()*pool.length)];
   diceResult.textContent=trf('diceResult',recName(pick));diceResult.classList.add('show');
-  setTimeout(()=>{const card=[...document.querySelectorAll('.card')].find(c=>c.dataset.name===pick.name);if(card){card.classList.add('flash');card.scrollIntoView({behavior:'smooth',block:'center'});setTimeout(()=>card.classList.remove('flash'),1400);}},120);
+  setTimeout(()=>highlightCard(pick.name),120);
 });
 
 /* ====== 买菜清单 ====== */
@@ -224,7 +231,7 @@ async function aiGenerate(){
     aiInput.value='';aiStatus.textContent=trf('aiAdded',recName(rec));
     document.querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));document.querySelector('[data-filter="all"]').classList.add('active');
     render('all');closePanel(aiOv,aiP);
-    setTimeout(()=>{const card=[...document.querySelectorAll('.card')].find(c=>c.dataset.name===rec.name);if(card){card.classList.add('flash');card.scrollIntoView({behavior:'smooth',block:'center'});setTimeout(()=>card.classList.remove('flash'),1400);}},150);
+    setTimeout(()=>highlightCard(rec.name),150);
   }catch(e){aiStatus.textContent=tr('aiNetErr');}
 }
 document.getElementById('aiGo').addEventListener('click',aiGenerate);
