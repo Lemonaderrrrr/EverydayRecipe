@@ -218,7 +218,7 @@ async function aiGenerate(){
     }
     const obj=await resp.json();
     let p=(Array.isArray(obj.p)?obj.p:[]).filter(x=>PSET.includes(x));if(p.length===0)p=['tofu'];
-    const rec={id:'c'+Date.now(),cat:'custom',sub:obj.type||'AI 生成',flag:'⭐',name:obj.name||desc,en:obj.en||'',p,ing:obj.ing||'',custom:true};
+    const rec={id:'c'+Date.now(),cat:'custom',sub:obj.type||'AI 生成',sub_en:obj.type_en||'AI generated',flag:'⭐',name:obj.name||desc,en:obj.en||'',p,ing:obj.ing||'',ing_en:obj.ing_en||'',custom:true};
     customRecipes.unshift(rec);saveCustom();
     aiInput.value='';aiStatus.textContent=trf('aiAdded',recName(rec));
     document.querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));document.querySelector('[data-filter="all"]').classList.add('active');

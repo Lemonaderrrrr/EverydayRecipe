@@ -32,9 +32,9 @@ Deno.serve(async (req: Request) => {
 
   const prompt =
     `根据这句话描述一道菜，只输出一个 JSON 对象，不要任何多余文字或 markdown 代码块。` +
-    `字段：name(中文菜名), en(英文或拼音名), type(中文小分类，如 炸物/盖饭/汤面/卷类/甜品/小吃), ` +
+    `字段：name(中文菜名), en(英文菜名), type(中文小分类，如 炸物/盖饭/汤面/卷类/甜品/小吃), type_en(对应英文小分类), ` +
     `p(数组，从这些蛋白质里选适用的：pork,chicken,beef,sea,egg,tofu；纯素或主要是淀粉就用 ["tofu"]), ` +
-    `ing(中文主要材料，用顿号、分隔，6到10样)。描述：${desc}`;
+    `ing(中文主要材料，用顿号、分隔，6到10样), ing_en(对应英文材料，用逗号 , 分隔，与 ing 一一对应)。描述：${desc}`;
 
   let aResp: Response;
   try {
@@ -68,7 +68,7 @@ Deno.serve(async (req: Request) => {
     .replace(/```/g, "")
     .trim();
 
-  let obj: { name?: string; en?: string; type?: string; p?: string[]; ing?: string };
+  let obj: { name?: string; en?: string; type?: string; type_en?: string; p?: string[]; ing?: string; ing_en?: string };
   try {
     obj = JSON.parse(text);
   } catch {
@@ -79,7 +79,9 @@ Deno.serve(async (req: Request) => {
     name: obj.name ?? "",
     en: obj.en ?? "",
     type: obj.type ?? "",
+    type_en: obj.type_en ?? "",
     p: Array.isArray(obj.p) ? obj.p : [],
     ing: obj.ing ?? "",
+    ing_en: obj.ing_en ?? "",
   });
 });
