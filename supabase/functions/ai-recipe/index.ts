@@ -1,4 +1,4 @@
-// Supabase Edge Function：AI 一句话加菜代理。
+// Supabase Edge Function：AI 一句话加菜代理（接智谱 GLM）。
 // verify_jwt 默认开启，未登录请求由网关 401 拦下，函数内无需再校验 JWT。
 
 const CORS = {
@@ -27,7 +27,7 @@ Deno.serve(async (req: Request) => {
   }
   if (!desc) return json({ error: "缺少描述" }, 400);
 
-  const apiKey = Deno.env.get("ANTHROPIC_API_KEY");
+  const apiKey = Deno.env.get("ZHIPU_API_KEY");
   if (!apiKey) return json({ error: "服务端未配置 API key" }, 500);
 
   const prompt =
@@ -38,17 +38,16 @@ Deno.serve(async (req: Request) => {
 
   let aResp: Response;
   try {
-    aResp = await fetch("https://api.anthropic.com/v1/messages", {
+    aResp = await fetch("https://open.bigmodel.cn/api/paas/v4/chat/completions", {
       method: "POST",
       headers: {
-        "x-api-key": apiKey,
-        "anthropic-version": "2023-06-01",
-        "content-type": "application/json",
+        "Authorization": `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "claude-sonnet-4-20250514",
-        max_tokens: 1000,
+        model: "glm-4-flash",
         messages: [{ role: "user", content: prompt }],
+        response_format: { type: "json_object" },
       }),
     });
   } catch {
@@ -63,9 +62,7 @@ Deno.serve(async (req: Request) => {
   } catch {
     return json({ error: "AI 返回格式异常" }, 502);
   }
-  const text = (data.content || [])
-    .map((b: { text?: string }) => b.text || "")
-    .join("")
+  const text = (data?.choices?.[0]?.message?.content ?? "")
     .trim()
     .replace(/```json/g, "")
     .replace(/```/g, "")
