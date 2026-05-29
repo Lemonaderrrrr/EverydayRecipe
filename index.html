@@ -75,7 +75,7 @@
   <div class="p-head"><div class="p-title">✨ 一句话加菜谱</div><button class="p-close" id="aiClose">✕</button></div>
   <div class="p-add-row"><input class="p-input" id="aiInput" type="text" placeholder="一句话描述，例：韩式甜辣炸鸡" autocomplete="off"><button class="p-go" id="aiGo">→</button></div>
   <div class="ai-status" id="aiStatus">输入一道菜的描述，AI 会自动生成材料和蛋白质标签，加入「⭐ 我的菜谱」并云端同步。</div>
-  <div class="ai-note">注：AI 生成需联网且仅在 Claude 预览中可用；部署到 GitHub Pages 后此功能会失效（需后端代理才能调用 AI），但登录、收藏、买菜清单的云同步在 GitHub Pages 上正常工作。</div>
+  <div class="ai-note">注：AI 加菜已通过 Supabase 后端代理支持线上使用（需登录）。生成的菜谱会加入「⭐ 我的菜谱」并云端同步。</div>
 </div>
 
 <script src="data.js"></script>
