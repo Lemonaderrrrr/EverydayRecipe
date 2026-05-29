@@ -29,6 +29,9 @@
   .login-box .ghost:hover{background:var(--persimmon);color:#fff;}
   .login-note{font-size:.78rem!important;color:var(--ink-soft);margin:14px 0 0!important;min-height:18px;}
   .login-note.err{color:var(--persimmon-deep);}
+  .or-line{display:flex;align-items:center;gap:10px;margin:14px 0 4px;color:var(--ink-soft);font-size:.8rem;}
+  .or-line::before,.or-line::after{content:"";flex:1;height:1px;background:var(--line);}
+  .login-box .ghost.google{display:flex;align-items:center;justify-content:center;gap:8px;}
 
   header{padding:38px 0 18px;text-align:center;}
   .kicker{font-size:.68rem;letter-spacing:.3em;text-transform:uppercase;color:var(--persimmon);font-weight:700;margin-bottom:12px;}
@@ -136,6 +139,8 @@
     <input id="loginPw" type="password" placeholder="密码（至少 6 位）" autocomplete="current-password">
     <button class="primary" id="signInBtn">登录</button>
     <button class="ghost" id="signUpBtn">注册新账号</button>
+    <div class="or-line"><span>或</span></div>
+    <button class="ghost google" id="googleBtn">用 Google 登录</button>
     <p class="login-note" id="loginMsg">数据云端同步，多设备共享</p>
   </div>
 </div>
@@ -387,6 +392,16 @@ document.getElementById('userChip').addEventListener('click',async()=>{
   await sb.auth.signOut();userId=null;userEmail=null;favs=new Set();customRecipes=[];cart=[];
   document.getElementById('userChip').style.display='none';syncDot.textContent='';
   document.getElementById('loginPw').value='';showLogin();
+});
+document.getElementById('googleBtn').addEventListener('click',async()=>{
+  setMsg('跳转到 Google…');
+  const back=window.location.href.split('#')[0].split('?')[0];
+  const {error}=await sb.auth.signInWithOAuth({provider:'google',options:{redirectTo:back}});
+  if(error)setMsg('Google 登录失败：'+error.message,true);
+});
+// 处理 Google 跳转回来后的登录
+sb.auth.onAuthStateChange((event,session)=>{
+  if(event==='SIGNED_IN' && session && session.user.id!==userId) onAuthed(session);
 });
 
 /* ====== 渲染 ====== */
