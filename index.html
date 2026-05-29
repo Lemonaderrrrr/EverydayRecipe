@@ -15,67 +15,68 @@
 <div class="login-overlay" id="loginOverlay">
   <div class="login-box">
     <div class="login-emoji">🍜</div>
-    <h2>登录 / 注册</h2>
-    <p>用邮箱登录，收藏和菜谱会云端同步到所有设备</p>
-    <input id="loginEmail" type="email" placeholder="邮箱" autocomplete="username">
-    <input id="loginPw" type="password" placeholder="密码（至少 6 位）" autocomplete="current-password">
-    <button class="primary" id="signInBtn">登录</button>
-    <button class="ghost" id="signUpBtn">注册新账号</button>
-    <div class="or-line"><span>或</span></div>
-    <button class="ghost google" id="googleBtn">用 Google 登录</button>
-    <p class="login-note" id="loginMsg">数据云端同步，多设备共享</p>
+    <h2 data-i18n="loginH2">登录 / 注册</h2>
+    <p data-i18n="loginIntro">用邮箱登录，收藏和菜谱会云端同步到所有设备</p>
+    <input id="loginEmail" type="email" data-i18n-ph="phEmail" placeholder="邮箱" autocomplete="username">
+    <input id="loginPw" type="password" data-i18n-ph="phPw" placeholder="密码（至少 6 位）" autocomplete="current-password">
+    <button class="primary" id="signInBtn" data-i18n="signIn">登录</button>
+    <button class="ghost" id="signUpBtn" data-i18n="signUp">注册新账号</button>
+    <div class="or-line"><span data-i18n="or">或</span></div>
+    <button class="ghost google" id="googleBtn" data-i18n="google">用 Google 登录</button>
+    <p class="login-note" id="loginMsg" data-i18n="loginNote">数据云端同步，多设备共享</p>
   </div>
 </div>
 
 <div class="wrap">
   <header>
-    <div class="kicker">汉堡·三明治·卷·饭·面·粥·点心·小吃·甜品</div>
-    <h1>全球<span class="accent">快餐</span>大全</h1>
-    <p class="subtitle">9 大类 × 子类细分 · 蛋白质筛选 · 收藏 · AI 加菜 · 云同步</p>
+    <div class="kicker" data-i18n="kicker">汉堡·三明治·卷·饭·面·粥·点心·小吃·甜品</div>
+    <h1 data-i18n-html="h1">全球<span class="accent">快餐</span>大全</h1>
+    <p class="subtitle" data-i18n="subtitle">9 大类 × 子类细分 · 蛋白质筛选 · 收藏 · AI 加菜 · 云同步</p>
     <div class="header-rule"></div>
-    <button class="user-chip" id="userChip" style="display:none">👤 <span id="userName"></span> · 退出</button>
+    <div class="lang-toggle"><button data-lang="zh">中</button><button data-lang="en">EN</button></div>
+    <button class="user-chip" id="userChip" style="display:none">👤 <span id="userName"></span> · <span data-i18n="logout">退出</span></button>
     <div class="sync-dot" id="syncDot"></div>
     <div class="dice-zone">
-      <button class="dice-btn" id="diceBtn">🎲 今天吃啥？随机选一道</button>
-      <button class="ai-add-btn" id="aiOpen">✨ 一句话加菜谱</button>
+      <button class="dice-btn" id="diceBtn" data-i18n="dice">🎲 今天吃啥？随机选一道</button>
+      <button class="ai-add-btn" id="aiOpen" data-i18n="aiOpen">✨ 一句话加菜谱</button>
       <div class="dice-result" id="diceResult"></div>
     </div>
   </header>
 
   <nav class="filters" id="filters">
-    <span class="filt-label">按蛋白质筛选 · 或看收藏</span>
-    <span class="chip active" data-filter="all">全部</span>
-    <span class="chip fav-chip" data-filter="fav">♥ 我的收藏</span>
-    <span class="chip" data-filter="pork">🐷 猪</span>
-    <span class="chip" data-filter="chicken">🐔 鸡</span>
-    <span class="chip" data-filter="beef">🐄 牛</span>
-    <span class="chip" data-filter="sea">🐟 鱼虾</span>
-    <span class="chip" data-filter="egg">🥚 蛋</span>
-    <span class="chip" data-filter="tofu">🫛 豆腐素</span>
-    <span class="chip" data-filter="mix">🍲 混合</span>
+    <span class="filt-label" data-i18n="filtLabel">按蛋白质筛选 · 或看收藏</span>
+    <span class="chip active" data-filter="all" data-i18n="fAll">全部</span>
+    <span class="chip fav-chip" data-filter="fav" data-i18n="fFav">♥ 我的收藏</span>
+    <span class="chip" data-filter="pork" data-i18n="fPork">🐷 猪</span>
+    <span class="chip" data-filter="chicken" data-i18n="fChicken">🐔 鸡</span>
+    <span class="chip" data-filter="beef" data-i18n="fBeef">🐄 牛</span>
+    <span class="chip" data-filter="sea" data-i18n="fSea">🐟 鱼虾</span>
+    <span class="chip" data-filter="egg" data-i18n="fEgg">🥚 蛋</span>
+    <span class="chip" data-filter="tofu" data-i18n="fTofu">🫛 豆腐素</span>
+    <span class="chip" data-filter="mix" data-i18n="fMix">🍲 混合</span>
   </nav>
 
   <main id="list"></main>
 
-  <footer>9 大类 · 几十个国家 · ♥ 收藏 · ✨ AI 加菜 · ☁️ 跨设备同步</footer>
+  <footer data-i18n="footer">9 大类 · 几十个国家 · ♥ 收藏 · ✨ AI 加菜 · ☁️ 跨设备同步</footer>
 </div>
 
 <button class="cart-fab" id="cartFab" aria-label="买菜清单">🛒<span class="cart-badge" id="cartBadge">0</span></button>
 
 <div class="ov" id="cartOverlay"></div>
 <div class="panel" id="cartPanel">
-  <div class="p-head"><div class="p-title">🛒 买菜备忘录</div><button class="p-close" id="cartClose">✕</button></div>
-  <div class="p-add-row"><input class="p-input" id="cartInput" type="text" placeholder="加一样要买的东西…" autocomplete="off"><button class="p-go" id="cartAdd">＋</button></div>
+  <div class="p-head"><div class="p-title" data-i18n="cartTitle">🛒 买菜备忘录</div><button class="p-close" id="cartClose">✕</button></div>
+  <div class="p-add-row"><input class="p-input" id="cartInput" type="text" data-i18n-ph="phCart" placeholder="加一样要买的东西…" autocomplete="off"><button class="p-go" id="cartAdd">＋</button></div>
   <ul class="cart-list" id="cartList"></ul>
-  <div class="cart-foot"><span class="cart-count" id="cartCount">还要买 0 样</span><button class="cart-clear" id="cartClear">清除已买</button></div>
+  <div class="cart-foot"><span class="cart-count" id="cartCount">还要买 0 样</span><button class="cart-clear" id="cartClear" data-i18n="cartClear">清除已买</button></div>
 </div>
 
 <div class="ov" id="aiOverlay"></div>
 <div class="panel" id="aiPanel">
-  <div class="p-head"><div class="p-title">✨ 一句话加菜谱</div><button class="p-close" id="aiClose">✕</button></div>
-  <div class="p-add-row"><input class="p-input" id="aiInput" type="text" placeholder="一句话描述，例：韩式甜辣炸鸡" autocomplete="off"><button class="p-go" id="aiGo">→</button></div>
-  <div class="ai-status" id="aiStatus">输入一道菜的描述，AI 会自动生成材料和蛋白质标签，加入「⭐ 我的菜谱」并云端同步。</div>
-  <div class="ai-note">注：AI 加菜已通过 Supabase 后端代理支持线上使用（需登录）。生成的菜谱会加入「⭐ 我的菜谱」并云端同步。</div>
+  <div class="p-head"><div class="p-title" data-i18n="aiTitle">✨ 一句话加菜谱</div><button class="p-close" id="aiClose">✕</button></div>
+  <div class="p-add-row"><input class="p-input" id="aiInput" type="text" data-i18n-ph="phAi" placeholder="一句话描述，例：韩式甜辣炸鸡" autocomplete="off"><button class="p-go" id="aiGo">→</button></div>
+  <div class="ai-status" id="aiStatus" data-i18n="aiStatusDefault">输入一道菜的描述，AI 会自动生成材料和蛋白质标签，加入「⭐ 我的菜谱」并云端同步。</div>
+  <div class="ai-note" data-i18n="aiNote">注：AI 加菜已通过 Supabase 后端代理支持线上使用（需登录）。生成的菜谱会加入「⭐ 我的菜谱」并云端同步。</div>
 </div>
 
 <script src="data.js"></script>

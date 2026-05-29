@@ -7,6 +7,34 @@ const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 /* ====== 数据 ====== */
 const list=document.getElementById('list');
 
+/* ====== i18n ====== */
+function resolveLang(){
+  const saved=localStorage.getItem('lang');
+  if(saved==='zh'||saved==='en')return saved;
+  return (navigator.language||'zh').toLowerCase().startsWith('zh')?'zh':'en';
+}
+let lang=resolveLang();
+function tr(key){const e=UI[key];return e?(e[lang]||e.zh):key;}
+function trf(key,n){return tr(key).replace('{n}',n);}
+function applyUI(){
+  document.title=tr('pageTitle');
+  document.querySelectorAll('[data-i18n]').forEach(el=>{el.textContent=tr(el.dataset.i18n);});
+  document.querySelectorAll('[data-i18n-html]').forEach(el=>{el.innerHTML=tr(el.dataset.i18nHtml);});
+  document.querySelectorAll('[data-i18n-ph]').forEach(el=>{el.placeholder=tr(el.dataset.i18nPh);});
+  document.querySelectorAll('.lang-toggle button').forEach(b=>b.classList.toggle('on',b.dataset.lang===lang));
+}
+function setLang(l){
+  if(l!==lang){lang=l;localStorage.setItem('lang',l);}
+  document.documentElement.lang=(l==='en')?'en':'zh-CN';
+  applyUI();
+  if(document.getElementById('list').children.length)render(currentFilter);
+  renderCart();
+  if(typeof userId!=='undefined'&&userId)persist();
+}
+document.querySelectorAll('.lang-toggle button').forEach(b=>{
+  b.addEventListener('click',()=>setLang(b.dataset.lang));
+});
+
 /* ====== 用户态 + 云同步 ====== */
 let userId=null, userEmail=null, favs=new Set(), customRecipes=[], cart=[], currentFilter='all';
 const syncDot=document.getElementById('syncDot');
@@ -195,6 +223,8 @@ aiInput.addEventListener('keydown',e=>{if(e.key==='Enter')aiGenerate();});
 
 /* ====== 启动 ====== */
 (async function init(){
+  document.documentElement.lang=(lang==='en')?'en':'zh-CN';
+  applyUI();
   const {data:{session}}=await sb.auth.getSession();
   if(session&&session.user){onAuthed(session);}else{showLogin();}
 })();
