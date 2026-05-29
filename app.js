@@ -34,7 +34,7 @@ async function loadData(){
 async function onAuthed(session){
   userId=session.user.id;userEmail=session.user.email;
   document.getElementById('userName').textContent=userEmail;
-  document.getElementById('userChip').style.display='inline-flex';
+  document.getElementById('userMenu').style.display='inline-flex';
   document.getElementById('loginOverlay').classList.add('hidden');
   await loadData();
   renderCart();render('all');
@@ -61,10 +61,27 @@ document.getElementById('signUpBtn').addEventListener('click',async()=>{
   if(data.session){onAuthed(data.session);}
   else{setMsg('注册成功！如开启了邮箱确认，请先去邮箱点确认链接，再回来登录。',false);}
 });
-document.getElementById('userChip').addEventListener('click',async()=>{
+const userDropdown=document.getElementById('userDropdown');
+function closeUserMenu(){userDropdown.hidden=true;}
+function toggleUserMenu(){userDropdown.hidden=!userDropdown.hidden;}
+document.getElementById('userChip').addEventListener('click',(e)=>{e.stopPropagation();toggleUserMenu();});
+document.addEventListener('click',(e)=>{if(!e.target.closest('#userMenu'))closeUserMenu();});
+document.getElementById('signOutBtn').addEventListener('click',async()=>{
+  closeUserMenu();
   await sb.auth.signOut();userId=null;userEmail=null;favs=new Set();customRecipes=[];cart=[];
-  document.getElementById('userChip').style.display='none';syncDot.textContent='';
+  document.getElementById('userMenu').style.display='none';syncDot.textContent='';
   document.getElementById('loginPw').value='';showLogin();
+});
+document.getElementById('exportBtn').addEventListener('click',()=>{closeUserMenu();exportBackup();});
+document.getElementById('importBtn').addEventListener('click',()=>{
+  closeUserMenu();
+  const inp=document.getElementById('importFile');
+  inp.value=''; // 允许重复选同一文件
+  inp.click();
+});
+document.getElementById('importFile').addEventListener('change',(e)=>{
+  const f=e.target.files&&e.target.files[0];
+  if(f) importBackup(f);
 });
 document.getElementById('googleBtn').addEventListener('click',async()=>{
   setMsg('跳转到 Google…');
@@ -190,3 +207,84 @@ aiInput.addEventListener('keydown',e=>{if(e.key==='Enter')aiGenerate();});
   const {data:{session}}=await sb.auth.getSession();
   if(session&&session.user){onAuthed(session);}else{showLogin();}
 })();
+
+/* ====== 轻量 toast ====== */
+let _toastT;
+function showToast(msg){
+  const el=document.getElementById('toast');
+  if(!el)return;
+  el.textContent=msg; el.classList.add('show');
+  clearTimeout(_toastT);
+  _toastT=setTimeout(()=>el.classList.remove('show'),2600);
+}
+
+/* ====== 导出 / 导入备份 ====== */
+function exportBackup(){
+  const d=new Date();
+  const payload={
+    app:'EverydayRecipe',
+    version:1,
+    exportedAt:d.toISOString(),
+    favorites:[...favs],
+    customs:customRecipes,
+    cart:cart
+  };
+  const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const stamp=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  const a=document.createElement('a');
+  a.href=url; a.download=`everydayrecipe-backup-${stamp}.json`;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),100);
+  showToast('已导出备份文件 ⬇');
+}
+
+function stripTags(s){ return String(s).replace(/<[^>]*>/g,''); }
+
+function importBackup(file){
+  const reader=new FileReader();
+  reader.onload=()=>{
+    let data;
+    try{ data=JSON.parse(reader.result); }
+    catch(e){ showToast('文件格式不对，导入失败'); return; }
+    if(!data || typeof data!=='object' ||
+       !(Array.isArray(data.favorites)||Array.isArray(data.customs)||Array.isArray(data.cart))){
+      showToast('文件格式不对，导入失败'); return;
+    }
+    let addedF=0, addedC=0, addedK=0;
+    // 收藏：按菜名并集
+    (Array.isArray(data.favorites)?data.favorites:[]).forEach(n=>{
+      if(typeof n==='string' && !favs.has(n)){ favs.add(n); addedF++; }
+    });
+    // 自定义菜：按 id 去重追加（校验结构 + 清洗字符串，防止导入文件注入 HTML）
+    const ids=new Set(customRecipes.map(c=>c.id));
+    (Array.isArray(data.customs)?data.customs:[]).forEach(c=>{
+      if(c && c.id!=null && !ids.has(c.id) && typeof c.name==='string' && Array.isArray(c.p)){
+        customRecipes.push({
+          ...c,
+          name:stripTags(c.name),
+          en:stripTags(c.en||''),
+          ing:stripTags(c.ing||''),
+          flag:stripTags(c.flag||''),
+          sub:stripTags(c.sub||''),
+          p:c.p.filter(x=>typeof x==='string').map(stripTags)
+        });
+        ids.add(c.id); addedC++;
+      }
+    });
+    // 清单：按 text 去重（沿用 addCartItem），新项 done=false；清洗防止 HTML 注入
+    (Array.isArray(data.cart)?data.cart:[]).forEach(it=>{
+      if(it && typeof it.text==='string'){
+        const before=cart.length;
+        addCartItem(stripTags(it.text));
+        if(cart.length>before) addedK++;
+      }
+    });
+    persist();
+    render(currentFilter);
+    renderCart();
+    showToast(`已导入：收藏 +${addedF}，自定义菜 +${addedC}，清单 +${addedK}`);
+  };
+  reader.onerror=()=>showToast('文件读取失败');
+  reader.readAsText(file);
+}
