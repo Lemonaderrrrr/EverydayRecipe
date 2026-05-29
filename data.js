@@ -114,19 +114,23 @@ const BUILTIN = [
 ];
 
 const formats = {
-  custom:{em:'⭐',name:'我的菜谱',desc:'你用 AI 一句话生成、云端同步的菜。'},
-  burger:{em:'🍔',name:'汉堡',desc:'肉饼夹圆面包，全球都有本地版本。'},
-  sandwich:{em:'🥪',name:'三明治',desc:'面包夹料，分冷食、热压、长面包潜艇。'},
-  wrap:{em:'🌯',name:'卷类',desc:'薄饼或皮塔卷馅，美洲、中东、亚洲各有风格。'},
-  rice:{em:'🍚',name:'饭类',desc:'亚洲餐桌的核心：炒、盖、拌、煲、抓、团。'},
-  noodle:{em:'🍜',name:'面·粉',desc:'汤的、拌的、炒的，米麦皆有。'},
-  congee:{em:'🥘',name:'粥·汤饭',desc:'熬煮或汤泡的米食，暖胃好消化。'},
-  bundump:{em:'🥟',name:'包·饺·点心',desc:'面皮包馅：蒸包夹饼、饺子、蒸炸点心。'},
-  snack:{em:'🍢',name:'串·小吃',desc:'街边手持：烤串、油炸、铁板煎烙。'},
-  dessert:{em:'🍰',name:'甜品',desc:'亚洲甜点：米食、冰品、糕饼。'},
+  custom:{em:'⭐',name:'我的菜谱',name_en:'My Recipes',desc:'你用 AI 一句话生成、云端同步的菜。',desc_en:'Recipes you generate with AI, synced to the cloud.'},
+  burger:{em:'🍔',name:'汉堡',name_en:'Burgers',desc:'肉饼夹圆面包，全球都有本地版本。',desc_en:'A patty in a round bun — every cuisine has its own.'},
+  sandwich:{em:'🥪',name:'三明治',name_en:'Sandwiches',desc:'面包夹料，分冷食、热压、长面包潜艇。',desc_en:'Filled bread — cold, pressed, or long subs.'},
+  wrap:{em:'🌯',name:'卷类',name_en:'Wraps',desc:'薄饼或皮塔卷馅，美洲、中东、亚洲各有风格。',desc_en:'Flatbread or pita wraps — American, Middle Eastern, Asian styles.'},
+  rice:{em:'🍚',name:'饭类',name_en:'Rice',desc:'亚洲餐桌的核心：炒、盖、拌、煲、抓、团。',desc_en:'The heart of the Asian table: fried, bowls, mixed, claypot, pilaf, balls.'},
+  noodle:{em:'🍜',name:'面·粉',name_en:'Noodles',desc:'汤的、拌的、炒的，米麦皆有。',desc_en:'In soup, tossed, or fried — wheat and rice.'},
+  congee:{em:'🥘',name:'粥·汤饭',name_en:'Congee & Soup Rice',desc:'熬煮或汤泡的米食，暖胃好消化。',desc_en:'Simmered or soup-soaked rice — warm and easy on the stomach.'},
+  bundump:{em:'🥟',name:'包·饺·点心',name_en:'Buns, Dumplings & Dim Sum',desc:'面皮包馅：蒸包夹饼、饺子、蒸炸点心。',desc_en:'Filled dough: steamed buns, dumplings, dim sum.'},
+  snack:{em:'🍢',name:'串·小吃',name_en:'Skewers & Snacks',desc:'街边手持：烤串、油炸、铁板煎烙。',desc_en:'Street eats: skewers, deep-fried, griddled.'},
+  dessert:{em:'🍰',name:'甜品',name_en:'Desserts',desc:'亚洲甜点：米食、冰品、糕饼。',desc_en:'Asian sweets: rice desserts, frozen treats, pastries.'},
 };
 const formatOrder=['custom','burger','sandwich','wrap','rice','noodle','congee','bundump','snack','dessert'];
-const pInfo={pork:'🐷猪',chicken:'🐔鸡',beef:'🐄牛',sea:'🐟鱼虾',egg:'🥚蛋',tofu:'🫛豆腐素'};
+const pInfo={
+  pork:{zh:'🐷猪',en:'🐷Pork'}, chicken:{zh:'🐔鸡',en:'🐔Chicken'},
+  beef:{zh:'🐄牛',en:'🐄Beef'}, sea:{zh:'🐟鱼虾',en:'🐟Seafood'},
+  egg:{zh:'🥚蛋',en:'🥚Egg'}, tofu:{zh:'🫛豆腐素',en:'🫛Tofu/Veg'}
+};
 const PSET=['pork','chicken','beef','sea','egg','tofu'];
 
 /* 界面文案字典：{key:{zh,en}}。{n} 为占位符，由 trf() 替换。 */

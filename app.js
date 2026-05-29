@@ -34,6 +34,13 @@ function setLang(l){
 document.querySelectorAll('.lang-toggle button').forEach(b=>{
   b.addEventListener('click',()=>setLang(b.dataset.lang));
 });
+function recName(r){return lang==='en'?(r.en||r.name):r.name;}      // 卡片主标题
+function recAlt(r){return lang==='en'?r.name:(r.en||'');}            // 副标题（另一语言）
+function recIng(r){return lang==='en'?(r.ing_en||r.ing):r.ing;}     // 材料（缺英文回退中文）
+function recSub(r){return lang==='en'?(r.sub_en||r.sub):r.sub;}     // 子类
+function fmtName(c){return lang==='en'?(c.name_en||c.name):c.name;}
+function fmtDesc(c){return lang==='en'?(c.desc_en||c.desc):c.desc;}
+function ptagLabel(x){const e=pInfo[x];return e?(e[lang]||e.zh):x;}
 
 /* ====== 用户态 + 云同步 ====== */
 let userId=null, userEmail=null, favs=new Set(), customRecipes=[], cart=[], currentFilter='all';
@@ -48,9 +55,9 @@ function saveCart(){persist();}
 
 async function syncUp(){
   if(!userId)return;
-  syncDot.textContent='☁️ 同步中…';
+  syncDot.textContent=tr('syncing');
   const {error}=await sb.from('user_data').upsert({user_id:userId,favorites:[...favs],customs:customRecipes,cart:cart,updated_at:new Date().toISOString()});
-  syncDot.textContent=error?('⚠️ 同步失败：'+error.message):'✓ 已云端同步';
+  syncDot.textContent=error?(tr('syncFail')+error.message):tr('synced');
   setTimeout(()=>{if(syncDot.textContent.startsWith('✓'))syncDot.textContent='';},1800);
 }
 async function loadData(){
@@ -74,20 +81,20 @@ function setMsg(t,err){const m=document.getElementById('loginMsg');m.textContent
 
 document.getElementById('signInBtn').addEventListener('click',async()=>{
   const email=document.getElementById('loginEmail').value.trim(),pw=document.getElementById('loginPw').value;
-  if(!email||!pw){setMsg('请输入邮箱和密码',true);return;}
-  setMsg('登录中…');
+  if(!email||!pw){setMsg(tr('needEmailPw'),true);return;}
+  setMsg(tr('signingIn'));
   const {data,error}=await sb.auth.signInWithPassword({email,password:pw});
-  if(error){setMsg('登录失败：'+error.message,true);return;}
+  if(error){setMsg(tr('signInFail')+error.message,true);return;}
   if(data.session)onAuthed(data.session);
 });
 document.getElementById('signUpBtn').addEventListener('click',async()=>{
   const email=document.getElementById('loginEmail').value.trim(),pw=document.getElementById('loginPw').value;
-  if(!email||pw.length<6){setMsg('请输入邮箱，密码至少 6 位',true);return;}
-  setMsg('注册中…');
+  if(!email||pw.length<6){setMsg(tr('needPw6'),true);return;}
+  setMsg(tr('signingUp'));
   const {data,error}=await sb.auth.signUp({email,password:pw});
-  if(error){setMsg('注册失败：'+error.message,true);return;}
+  if(error){setMsg(tr('signUpFail')+error.message,true);return;}
   if(data.session){onAuthed(data.session);}
-  else{setMsg('注册成功！如开启了邮箱确认，请先去邮箱点确认链接，再回来登录。',false);}
+  else{setMsg(tr('signUpOk'),false);}
 });
 document.getElementById('userChip').addEventListener('click',async()=>{
   await sb.auth.signOut();userId=null;userEmail=null;favs=new Set();customRecipes=[];cart=[];
@@ -95,10 +102,10 @@ document.getElementById('userChip').addEventListener('click',async()=>{
   document.getElementById('loginPw').value='';showLogin();
 });
 document.getElementById('googleBtn').addEventListener('click',async()=>{
-  setMsg('跳转到 Google…');
+  setMsg(tr('googleRedirect'));
   const back=window.location.href.split('#')[0].split('?')[0];
   const {error}=await sb.auth.signInWithOAuth({provider:'google',options:{redirectTo:back}});
-  if(error)setMsg('Google 登录失败：'+error.message,true);
+  if(error)setMsg(tr('googleFail')+error.message,true);
 });
 // 处理 Google 跳转回来后的登录
 sb.auth.onAuthStateChange((event,session)=>{
@@ -106,30 +113,30 @@ sb.auth.onAuthStateChange((event,session)=>{
 });
 
 /* ====== 渲染 ====== */
-function ptagsHtml(p){let t=p.map(x=>`<span class="ptag">${pInfo[x]||x}</span>`).join('');if(p.length>=2)t+=`<span class="ptag" style="background:#fcefcf;color:#c9962e;">🍲混合</span>`;return t;}
+function ptagsHtml(p){let t=p.map(x=>`<span class="ptag">${ptagLabel(x)}</span>`).join('');if(p.length>=2)t+=`<span class="ptag" style="background:#fcefcf;color:#c9962e;">${tr('mix')}</span>`;return t;}
 function matchFilter(r,f){if(f==='all')return true;if(f==='fav')return favs.has(r.name);if(f==='mix')return r.p.length>=2;return r.p.includes(f);}
 function makeCard(r){
   const card=document.createElement('div');card.className='card';card.dataset.name=r.name;
   const faved=favs.has(r.name);
   card.innerHTML=`
     <div class="card-top">
-      <div class="name"><span class="flag">${r.flag}</span>${r.name}<span class="en">${r.en||''}</span></div>
+      <div class="name"><span class="flag">${r.flag}</span>${recName(r)}<span class="en">${recAlt(r)}</span></div>
       <div class="ptags">${ptagsHtml(r.p)}</div>
     </div>
-    <div class="ing"><span class="lab">材料</span>${r.ing}</div>
+    <div class="ing"><span class="lab">${tr('ingLabel')}</span>${recIng(r)}</div>
     <div class="card-actions">
-      <button class="act-btn act-fav ${faved?'on':''}">${faved?'♥ 已收藏':'♡ 收藏'}</button>
-      <button class="act-btn act-cart">🛒 加入买菜清单</button>
-      ${r.custom?'<button class="act-btn act-del">✕ 删除</button>':''}
+      <button class="act-btn act-fav ${faved?'on':''}">${faved?tr('favOn'):tr('favOff')}</button>
+      <button class="act-btn act-cart">${tr('addCart')}</button>
+      ${r.custom?`<button class="act-btn act-del">${tr('del')}</button>`:''}
     </div>`;
   const favBtn=card.querySelector('.act-fav');
   favBtn.addEventListener('click',()=>{
     if(favs.has(r.name))favs.delete(r.name);else favs.add(r.name);
     saveFavs();
-    if(currentFilter==='fav'){render('fav');}else{const on=favs.has(r.name);favBtn.classList.toggle('on',on);favBtn.textContent=on?'♥ 已收藏':'♡ 收藏';}
+    if(currentFilter==='fav'){render('fav');}else{const on=favs.has(r.name);favBtn.classList.toggle('on',on);favBtn.textContent=on?tr('favOn'):tr('favOff');}
   });
   const cartBtn=card.querySelector('.act-cart');
-  cartBtn.addEventListener('click',()=>{addIngredientsToCart(r.ing);cartBtn.classList.add('added');cartBtn.textContent='✓ 已加入';setTimeout(()=>{cartBtn.classList.remove('added');cartBtn.textContent='🛒 加入买菜清单';},1500);});
+  cartBtn.addEventListener('click',()=>{addIngredientsToCart(recIng(r));cartBtn.classList.add('added');cartBtn.textContent=tr('added');setTimeout(()=>{cartBtn.classList.remove('added');cartBtn.textContent=tr('addCart');},1500);});
   if(r.custom){card.querySelector('.act-del').addEventListener('click',()=>{customRecipes=customRecipes.filter(x=>x.id!==r.id);favs.delete(r.name);saveCustom();render(currentFilter);});}
   return card;
 }
@@ -138,23 +145,23 @@ function render(filter){
   if(filter==='fav'){
     const favCount=allRecipes().filter(r=>favs.has(r.name)).length;
     const b=document.createElement('div');b.className='fav-banner';
-    if(favCount===0)b.innerHTML='还没有收藏～ 点菜品上的 ♡ 收藏，就会出现在这里。';
-    else b.innerHTML=`你收藏了 <b>${favCount}</b> 道<br><button id="favToCart">🛒 把全部收藏的材料加入买菜清单</button>`;
+    if(favCount===0)b.innerHTML=tr('favEmpty');
+    else b.innerHTML=`${trf('favHave',favCount)}<br><button id="favToCart">${tr('favToCart')}</button>`;
     list.appendChild(b);
     const ftc=document.getElementById('favToCart');
-    if(ftc)ftc.addEventListener('click',()=>{allRecipes().filter(r=>favs.has(r.name)).forEach(r=>addIngredientsToCart(r.ing));ftc.textContent='✓ 已全部加入清单';});
+    if(ftc)ftc.addEventListener('click',()=>{allRecipes().filter(r=>favs.has(r.name)).forEach(r=>addIngredientsToCart(recIng(r)));ftc.textContent=tr('favAllAdded');});
   }
   formatOrder.forEach(cat=>{
     const items=allRecipes().filter(r=>r.cat===cat && matchFilter(r,filter));
     if(items.length===0)return;any=true;
     const c=formats[cat];
     const label=document.createElement('div');label.className='cat-label';
-    label.innerHTML=`<span class="em">${c.em}</span>${c.name}<span class="count">${items.length} 种</span>`;list.appendChild(label);
-    const d=document.createElement('p');d.className='cat-desc';d.textContent=c.desc;list.appendChild(d);
+    label.innerHTML=`<span class="em">${c.em}</span>${fmtName(c)}<span class="count">${trf('catCount',items.length)}</span>`;list.appendChild(label);
+    const d=document.createElement('p');d.className='cat-desc';d.textContent=fmtDesc(c);list.appendChild(d);
     const subs=[];items.forEach(r=>{if(!subs.includes(r.sub))subs.push(r.sub);});
-    subs.forEach(sub=>{const sl=document.createElement('div');sl.className='sub-label';sl.textContent=sub;list.appendChild(sl);const grid=document.createElement('div');grid.className='card-grid';items.filter(r=>r.sub===sub).forEach(r=>grid.appendChild(makeCard(r)));list.appendChild(grid);});
+    subs.forEach(sub=>{const first=items.find(r=>r.sub===sub);const sl=document.createElement('div');sl.className='sub-label';sl.textContent=recSub(first);list.appendChild(sl);const grid=document.createElement('div');grid.className='card-grid';items.filter(r=>r.sub===sub).forEach(r=>grid.appendChild(makeCard(r)));list.appendChild(grid);});
   });
-  if(!any && filter!=='fav') list.innerHTML='<p class="empty">这个蛋白质下暂时没有菜，换一个试试 🍳</p>';
+  if(!any && filter!=='fav') list.innerHTML=`<p class="empty">${tr('emptyList')}</p>`;
 }
 document.getElementById('filters').addEventListener('click',e=>{if(!e.target.classList.contains('chip'))return;document.querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));e.target.classList.add('active');render(e.target.dataset.filter);});
 
@@ -162,7 +169,7 @@ const diceResult=document.getElementById('diceResult');
 document.getElementById('diceBtn').addEventListener('click',()=>{
   document.querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));document.querySelector('[data-filter="all"]').classList.add('active');render('all');
   const pool=allRecipes();const pick=pool[Math.floor(Math.random()*pool.length)];
-  diceResult.textContent=`→ 今天就做「${pick.name}」吧！`;diceResult.classList.add('show');
+  diceResult.textContent=trf('diceResult',recName(pick));diceResult.classList.add('show');
   setTimeout(()=>{const card=[...document.querySelectorAll('.card')].find(c=>c.dataset.name===pick.name);if(card){card.classList.add('flash');card.scrollIntoView({behavior:'smooth',block:'center'});setTimeout(()=>card.classList.remove('flash'),1400);}},120);
 });
 
@@ -170,9 +177,9 @@ document.getElementById('diceBtn').addEventListener('click',()=>{
 const cartList=document.getElementById('cartList'),cartBadge=document.getElementById('cartBadge'),cartCount=document.getElementById('cartCount');
 function renderCart(){
   cartList.innerHTML='';
-  if(cart.length===0)cartList.innerHTML='<li class="cart-empty">清单空空的～<br>手动添加，或在菜里点「加入买菜清单」</li>';
+  if(cart.length===0)cartList.innerHTML=`<li class="cart-empty">${tr('cartEmpty')}</li>`;
   else cart.forEach(item=>{const li=document.createElement('li');li.className='cart-item'+(item.done?' done':'');li.innerHTML=`<span class="cart-check${item.done?' done':''}">${item.done?'✓':''}</span><span class="cart-text">${item.text}</span><button class="cart-del">✕</button>`;li.querySelector('.cart-check').addEventListener('click',()=>{item.done=!item.done;saveCart();renderCart();});li.querySelector('.cart-del').addEventListener('click',()=>{cart=cart.filter(x=>x.id!==item.id);saveCart();renderCart();});cartList.appendChild(li);});
-  const left=cart.filter(x=>!x.done).length;cartBadge.textContent=left;cartBadge.classList.toggle('show',left>0);cartCount.textContent=`还要买 ${left} 样`;
+  const left=cart.filter(x=>!x.done).length;cartBadge.textContent=left;cartBadge.classList.toggle('show',left>0);cartCount.textContent=trf('cartLeft',left);
 }
 function addCartItem(text){const t=text.trim();if(!t)return;if(cart.some(x=>x.text===t&&!x.done))return;cart.push({id:Date.now()+Math.random(),text:t,done:false});}
 function addIngredientsToCart(ingStr){ingStr.split(/[、,]/).forEach(part=>{let n=part.replace(/（.*?）/g,'').trim();n=n.replace(/或.*$/,'').trim();if(n)addCartItem(n);});saveCart();renderCart();}
@@ -197,7 +204,7 @@ async function aiGenerate(){
   const desc=aiInput.value.trim();if(!desc)return;
   const {data:{session}}=await sb.auth.getSession();
   if(!session){showLogin();return;}
-  aiStatus.textContent='正在生成「'+desc+'」…';
+  aiStatus.textContent=trf('aiGenerating',desc);
   try{
     const resp=await fetch(`${SUPABASE_URL}/functions/v1/ai-recipe`,{
       method:'POST',
@@ -205,18 +212,18 @@ async function aiGenerate(){
       body:JSON.stringify({desc})
     });
     if(!resp.ok){
-      aiStatus.textContent=resp.status===401?'登录已过期，请重新登录':'AI 生成失败，请换个描述再试';
+      aiStatus.textContent=resp.status===401?tr('aiExpired'):tr('aiFail');
       return;
     }
     const obj=await resp.json();
     let p=(Array.isArray(obj.p)?obj.p:[]).filter(x=>PSET.includes(x));if(p.length===0)p=['tofu'];
     const rec={id:'c'+Date.now(),cat:'custom',sub:obj.type||'AI 生成',flag:'⭐',name:obj.name||desc,en:obj.en||'',p,ing:obj.ing||'',custom:true};
     customRecipes.unshift(rec);saveCustom();
-    aiInput.value='';aiStatus.textContent='已加入「⭐ 我的菜谱」：'+rec.name;
+    aiInput.value='';aiStatus.textContent=trf('aiAdded',recName(rec));
     document.querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));document.querySelector('[data-filter="all"]').classList.add('active');
     render('all');closePanel(aiOv,aiP);
     setTimeout(()=>{const card=[...document.querySelectorAll('.card')].find(c=>c.dataset.name===rec.name);if(card){card.classList.add('flash');card.scrollIntoView({behavior:'smooth',block:'center'});setTimeout(()=>card.classList.remove('flash'),1400);}},150);
-  }catch(e){aiStatus.textContent='网络错误，请稍后再试';}
+  }catch(e){aiStatus.textContent=tr('aiNetErr');}
 }
 document.getElementById('aiGo').addEventListener('click',aiGenerate);
 aiInput.addEventListener('keydown',e=>{if(e.key==='Enter')aiGenerate();});
