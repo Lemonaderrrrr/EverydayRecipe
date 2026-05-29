@@ -57,7 +57,12 @@ Deno.serve(async (req: Request) => {
 
   if (!aResp.ok) return json({ error: "AI 服务出错" }, 502);
 
-  const data = await aResp.json();
+  let data;
+  try {
+    data = await aResp.json();
+  } catch {
+    return json({ error: "AI 返回格式异常" }, 502);
+  }
   const text = (data.content || [])
     .map((b: { text?: string }) => b.text || "")
     .join("")
