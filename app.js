@@ -70,8 +70,6 @@ async function loadData(){
 
 async function onAuthed(session){
   userId=session.user.id;userEmail=session.user.email;
-  document.getElementById('userName').textContent=userEmail;
-  document.getElementById('userChip').style.display='inline-flex';
   document.getElementById('loginOverlay').classList.add('hidden');
   await loadData();
   renderCart();render('all');
@@ -98,11 +96,6 @@ document.getElementById('signUpBtn').addEventListener('click',async()=>{
   if(data.session){onAuthed(data.session);}
   else{setMsg(tr('signUpOk'),false);}
 });
-document.getElementById('userChip').addEventListener('click',async()=>{
-  await sb.auth.signOut();userId=null;userEmail=null;favs=new Set();customRecipes=[];cart=[];
-  document.getElementById('userChip').style.display='none';syncDot.textContent='';
-  document.getElementById('loginPw').value='';showLogin();
-});
 document.getElementById('googleBtn').addEventListener('click',async()=>{
   setMsg(tr('googleRedirect'));
   const back=window.location.href.split('#')[0].split('?')[0];
@@ -122,7 +115,7 @@ function makeCard(r){
   const faved=favs.has(r.name);
   card.innerHTML=`
     <div class="card-top">
-      <div class="name"><span class="flag">${r.flag}</span>${recName(r)}<span class="en">${recAlt(r)}</span></div>
+      <div class="name">${r.custom?`<span class="flag">${r.flag}</span>`:''}${recName(r)}<span class="en">${recAlt(r)}</span></div>
       <div class="ptags">${ptagsHtml(r.p)}</div>
     </div>
     <div class="ing"><span class="lab">${tr('ingLabel')}</span>${recIng(r)}</div>
@@ -167,12 +160,19 @@ function render(filter){
 }
 document.getElementById('filters').addEventListener('click',e=>{if(!e.target.classList.contains('chip'))return;document.querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));e.target.classList.add('active');render(e.target.dataset.filter);});
 
+function highlightCard(name){
+  const card=[...document.querySelectorAll('.card')].find(c=>c.dataset.name===name);
+  if(!card)return;
+  card.classList.add('picked');
+  card.scrollIntoView({behavior:'smooth',block:'center'});
+  setTimeout(()=>card.classList.remove('picked'),3000);
+}
 const diceResult=document.getElementById('diceResult');
 document.getElementById('diceBtn').addEventListener('click',()=>{
   document.querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));document.querySelector('[data-filter="all"]').classList.add('active');render('all');
   const pool=allRecipes();const pick=pool[Math.floor(Math.random()*pool.length)];
   diceResult.textContent=trf('diceResult',recName(pick));diceResult.classList.add('show');
-  setTimeout(()=>{const card=[...document.querySelectorAll('.card')].find(c=>c.dataset.name===pick.name);if(card){card.classList.add('flash');card.scrollIntoView({behavior:'smooth',block:'center'});setTimeout(()=>card.classList.remove('flash'),1400);}},120);
+  setTimeout(()=>highlightCard(pick.name),120);
 });
 
 /* ====== 买菜清单 ====== */
@@ -200,6 +200,55 @@ const aiOv=document.getElementById('aiOverlay'),aiP=document.getElementById('aiP
 document.getElementById('aiOpen').addEventListener('click',()=>{if(!userId){showLogin();return;}openPanel(aiOv,aiP);setTimeout(()=>aiInput.focus(),50);});
 document.getElementById('aiClose').addEventListener('click',()=>closePanel(aiOv,aiP));
 aiOv.addEventListener('click',()=>closePanel(aiOv,aiP));
+/* ====== 设置面板 ====== */
+const setOv=document.getElementById('settingsOverlay'),setP=document.getElementById('settingsPanel');
+document.getElementById('settingsFab').addEventListener('click',()=>{document.getElementById('setEmail').textContent=userEmail||'';openPanel(setOv,setP);});
+document.getElementById('settingsClose').addEventListener('click',()=>closePanel(setOv,setP));
+setOv.addEventListener('click',()=>closePanel(setOv,setP));
+document.getElementById('setLogout').addEventListener('click',async()=>{
+  closePanel(setOv,setP);
+  await sb.auth.signOut();userId=null;userEmail=null;favs=new Set();customRecipes=[];cart=[];
+  syncDot.textContent='';document.getElementById('loginPw').value='';showLogin();
+});
+
+/* ====== 菜谱码导出/导入 ====== */
+function encodeRecipes(arr){return 'ERX1:'+btoa(unescape(encodeURIComponent(JSON.stringify(arr))));}
+function decodeRecipes(code){
+  const m=String(code).trim();
+  if(!m.startsWith('ERX1:'))throw new Error('bad');
+  const arr=JSON.parse(decodeURIComponent(escape(atob(m.slice(5)))));
+  if(!Array.isArray(arr))throw new Error('bad');
+  return arr;
+}
+const aiCode=document.getElementById('aiCode'),aiShareStatus=document.getElementById('aiShareStatus');
+document.getElementById('aiExport').addEventListener('click',()=>{
+  if(customRecipes.length===0){aiShareStatus.textContent=tr('aiExportEmpty');return;}
+  aiCode.value=encodeRecipes(customRecipes);aiShareStatus.textContent='';aiCode.focus();aiCode.select();
+});
+document.getElementById('aiCopy').addEventListener('click',async()=>{
+  if(!aiCode.value)return;
+  try{await navigator.clipboard.writeText(aiCode.value);}catch(e){aiCode.focus();aiCode.select();}
+  aiShareStatus.textContent=tr('aiCopied');
+});
+document.getElementById('aiDoImport').addEventListener('click',()=>{
+  let arr;
+  try{arr=decodeRecipes(aiCode.value);}catch(e){aiShareStatus.textContent=tr('aiImportBad');return;}
+  let added=0;
+  arr.forEach(o=>{
+    if(!o||typeof o!=='object'||!o.name)return;
+    const ing=o.ing||'';
+    if(customRecipes.some(x=>x.name===o.name&&x.ing===ing))return;
+    let p=(Array.isArray(o.p)?o.p:[]).filter(x=>PSET.includes(x));if(p.length===0)p=['tofu'];
+    customRecipes.unshift({id:'c'+Date.now()+Math.floor(Math.random()*1000),cat:'custom',sub:o.sub||'AI 生成',sub_en:o.sub_en||'AI generated',flag:'⭐',name:o.name,en:o.en||'',p,ing,ing_en:o.ing_en||'',custom:true});
+    added++;
+  });
+  if(added===0){aiShareStatus.textContent=tr('aiImportEmpty');return;}
+  saveCustom();
+  document.querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));document.querySelector('[data-filter="all"]').classList.add('active');
+  render('all');
+  aiShareStatus.textContent=trf('aiImportDone',added);
+  aiCode.value='';
+});
 
 /* ====== AI 一句话加菜 ====== */
 async function aiGenerate(){
@@ -224,7 +273,7 @@ async function aiGenerate(){
     aiInput.value='';aiStatus.textContent=trf('aiAdded',recName(rec));
     document.querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));document.querySelector('[data-filter="all"]').classList.add('active');
     render('all');closePanel(aiOv,aiP);
-    setTimeout(()=>{const card=[...document.querySelectorAll('.card')].find(c=>c.dataset.name===rec.name);if(card){card.classList.add('flash');card.scrollIntoView({behavior:'smooth',block:'center'});setTimeout(()=>card.classList.remove('flash'),1400);}},150);
+    setTimeout(()=>highlightCard(rec.name),150);
   }catch(e){aiStatus.textContent=tr('aiNetErr');}
 }
 document.getElementById('aiGo').addEventListener('click',aiGenerate);
