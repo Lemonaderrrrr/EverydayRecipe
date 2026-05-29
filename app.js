@@ -122,7 +122,7 @@ function makeCard(r){
   const faved=favs.has(r.name);
   card.innerHTML=`
     <div class="card-top">
-      <div class="name"><span class="flag">${r.flag}</span>${recName(r)}<span class="en">${recAlt(r)}</span></div>
+      <div class="name">${r.custom?`<span class="flag">${r.flag}</span>`:''}${recName(r)}<span class="en">${recAlt(r)}</span></div>
       <div class="ptags">${ptagsHtml(r.p)}</div>
     </div>
     <div class="ing"><span class="lab">${tr('ingLabel')}</span>${recIng(r)}</div>
