@@ -203,4 +203,5 @@ const UI = {
   aiFail:{zh:'AI 生成失败，请换个描述再试', en:'Generation failed, try another description'},
   aiAdded:{zh:'已加入「⭐ 我的菜谱」：{n}', en:'Added to ⭐ My Recipes: {n}'},
   aiNetErr:{zh:'网络错误，请稍后再试', en:'Network error, try again later'},
+  cartAria:{zh:'买菜清单', en:'Shopping list'},
 };

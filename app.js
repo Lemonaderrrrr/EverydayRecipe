@@ -21,6 +21,7 @@ function applyUI(){
   document.querySelectorAll('[data-i18n]').forEach(el=>{el.textContent=tr(el.dataset.i18n);});
   document.querySelectorAll('[data-i18n-html]').forEach(el=>{el.innerHTML=tr(el.dataset.i18nHtml);});
   document.querySelectorAll('[data-i18n-ph]').forEach(el=>{el.placeholder=tr(el.dataset.i18nPh);});
+  document.querySelectorAll('[data-i18n-aria]').forEach(el=>{el.setAttribute('aria-label',tr(el.dataset.i18nAria));});
   document.querySelectorAll('.lang-toggle button').forEach(b=>b.classList.toggle('on',b.dataset.lang===lang));
 }
 function setLang(l){
