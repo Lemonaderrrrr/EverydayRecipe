@@ -233,6 +233,7 @@ document.getElementById('setLogout').addEventListener('click',async()=>{
   await sb.auth.signOut();userId=null;userEmail=null;favs=new Set();customRecipes=[];cart=[];
   syncDot.textContent='';document.getElementById('loginPw').value='';showLogin();
 });
+document.getElementById('setRetake').addEventListener('click',()=>{closePanel(setOv,setP);showQuiz();});
 
 /* ====== 画像测试 ====== */
 const quizOverlay=document.getElementById('quizOverlay');
