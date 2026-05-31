@@ -44,7 +44,7 @@ function fmtDesc(c){return lang==='en'?(c.desc_en||c.desc):c.desc;}
 function ptagLabel(x){const e=pInfo[x];return e?(e[lang]||e.zh):x;}
 
 /* ====== 用户态 + 云同步 ====== */
-let userId=null, userEmail=null, favs=new Set(), customRecipes=[], cart=[], currentFilter='all';
+let userId=null, userEmail=null, favs=new Set(), customRecipes=[], cart=[], profile=null, generated=[], currentFilter='all';
 const syncDot=document.getElementById('syncDot');
 function allRecipes(){return customRecipes.concat(BUILTIN);}
 
@@ -57,15 +57,15 @@ function saveCart(){persist();}
 async function syncUp(){
   if(!userId)return;
   syncDot.textContent=tr('syncing');
-  const {error}=await sb.from('user_data').upsert({user_id:userId,favorites:[...favs],customs:customRecipes,cart:cart,lang:lang,updated_at:new Date().toISOString()});
+  const {error}=await sb.from('user_data').upsert({user_id:userId,favorites:[...favs],customs:customRecipes,cart:cart,lang:lang,profile:profile,generated:generated,updated_at:new Date().toISOString()});
   syncDot.textContent=error?(tr('syncFail')+error.message):tr('synced');
   setTimeout(()=>{if(syncDot.textContent.startsWith('✓'))syncDot.textContent='';},1800);
 }
 async function loadData(){
-  const {data,error}=await sb.from('user_data').select('favorites,customs,cart,lang').eq('user_id',userId).maybeSingle();
-  if(data){favs=new Set(data.favorites||[]);customRecipes=data.customs||[];cart=data.cart||[];
+  const {data,error}=await sb.from('user_data').select('favorites,customs,cart,lang,profile,generated').eq('user_id',userId).maybeSingle();
+  if(data){favs=new Set(data.favorites||[]);customRecipes=data.customs||[];cart=data.cart||[];profile=data.profile||null;generated=data.generated||[];
     if(data.lang==='zh'||data.lang==='en'){lang=data.lang;localStorage.setItem('lang',lang);document.documentElement.lang=(lang==='en')?'en':'zh-CN';applyUI();}}
-  else{favs=new Set();customRecipes=[];cart=[];await syncUp();}
+  else{favs=new Set();customRecipes=[];cart=[];profile=null;generated=[];await syncUp();}
 }
 
 async function onAuthed(session){
