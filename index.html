@@ -78,6 +78,74 @@
   <div class="ai-note" data-i18n="aiNote">注：AI 加菜已通过 Supabase 后端代理支持线上使用（需登录）。生成的菜谱会加入「⭐ 我的菜谱」并云端同步。</div>
 </div>
 
+<div class="quiz-overlay hidden" id="quizOverlay">
+  <div class="quiz-box">
+    <div class="quiz-head">
+      <div class="quiz-emoji">🍽️</div>
+      <h2 data-i18n="quizH2">定制你的专属快餐大全</h2>
+      <p data-i18n="quizIntro">花 20 秒选一选，AI 为你生成合口味的菜单</p>
+    </div>
+    <div class="quiz-body" id="quizBody">
+      <div class="quiz-q"><div class="quiz-label" data-i18n="qMode">你的状态</div>
+        <div class="quiz-opts" data-q="mode" data-single="1">
+          <span class="qchip" data-val="efficient" data-i18n="qModeEff">效率优先·快手</span>
+          <span class="qchip" data-val="explorer" data-i18n="qModeExp">爱探索·有空下厨</span>
+        </div></div>
+      <div class="quiz-q"><div class="quiz-label" data-i18n="qLike">喜欢的蛋白质</div>
+        <div class="quiz-opts" data-q="like">
+          <span class="qchip" data-val="pork" data-i18n="fPork">🐷 猪</span>
+          <span class="qchip" data-val="chicken" data-i18n="fChicken">🐔 鸡</span>
+          <span class="qchip" data-val="beef" data-i18n="fBeef">🐄 牛</span>
+          <span class="qchip" data-val="sea" data-i18n="fSea">🐟 鱼虾</span>
+          <span class="qchip" data-val="egg" data-i18n="fEgg">🥚 蛋</span>
+          <span class="qchip" data-val="tofu" data-i18n="fTofu">🫛 豆腐素</span>
+        </div></div>
+      <div class="quiz-q"><div class="quiz-label" data-i18n="qAvoid">不吃的蛋白质</div>
+        <div class="quiz-opts" data-q="avoid">
+          <span class="qchip" data-val="pork" data-i18n="fPork">🐷 猪</span>
+          <span class="qchip" data-val="chicken" data-i18n="fChicken">🐔 鸡</span>
+          <span class="qchip" data-val="beef" data-i18n="fBeef">🐄 牛</span>
+          <span class="qchip" data-val="sea" data-i18n="fSea">🐟 鱼虾</span>
+          <span class="qchip" data-val="egg" data-i18n="fEgg">🥚 蛋</span>
+          <span class="qchip" data-val="tofu" data-i18n="fTofu">🫛 豆腐素</span>
+        </div></div>
+      <div class="quiz-q"><div class="quiz-label" data-i18n="qSpicy">能吃多辣</div>
+        <div class="quiz-opts" data-q="spicy" data-single="1">
+          <span class="qchip" data-val="0" data-i18n="qSpicy0">不吃辣</span>
+          <span class="qchip" data-val="1" data-i18n="qSpicy1">微辣</span>
+          <span class="qchip" data-val="2" data-i18n="qSpicy2">中辣</span>
+          <span class="qchip" data-val="3" data-i18n="qSpicy3">重辣</span>
+        </div></div>
+      <div class="quiz-q"><div class="quiz-label" data-i18n="qTaste">口味偏好</div>
+        <div class="quiz-opts" data-q="taste">
+          <span class="qchip" data-val="sweet" data-i18n="qSweet">偏甜</span>
+          <span class="qchip" data-val="sour" data-i18n="qSour">偏酸</span>
+          <span class="qchip" data-val="salty" data-i18n="qSalty">偏咸鲜</span>
+        </div></div>
+      <div class="quiz-q"><div class="quiz-label" data-i18n="qDiet">饮食限制</div>
+        <div class="quiz-opts" data-q="diet">
+          <span class="qchip" data-val="vegetarian" data-i18n="qVeg">素食</span>
+          <span class="qchip" data-val="halal" data-i18n="qHalal">清真</span>
+          <span class="qchip" data-val="no_pork" data-i18n="qNoPork">不吃猪肉</span>
+          <span class="qchip" data-val="no_seafood" data-i18n="qNoSea">海鲜过敏</span>
+        </div></div>
+      <div class="quiz-q"><div class="quiz-label" data-i18n="qCuisine">想吃的菜系</div>
+        <div class="quiz-opts" data-q="cuisines">
+          <span class="qchip" data-val="asian" data-i18n="qAsian">东亚</span>
+          <span class="qchip" data-val="sea" data-i18n="qSea2">东南亚</span>
+          <span class="qchip" data-val="mideast" data-i18n="qMideast">中东</span>
+          <span class="qchip" data-val="western" data-i18n="qWestern">欧美</span>
+          <span class="qchip" data-val="explore" data-i18n="qExplore">都想试试</span>
+        </div></div>
+    </div>
+    <button class="quiz-go" id="quizGo" data-i18n="quizGo">✨ 生成我的定制大全</button>
+    <div class="quiz-status" id="quizStatus"></div>
+  </div>
+  <div class="quiz-loading hidden" id="quizLoading">
+    <div class="quiz-spinner"></div>
+    <div class="quiz-loading-text" data-i18n="quizLoading">正在为你定制专属快餐大全…</div>
+  </div>
+</div>
 <div class="ov" id="settingsOverlay"></div>
 <div class="panel" id="settingsPanel">
   <div class="p-head"><div class="p-title" data-i18n="settingsTitle">⚙️ 设置</div><button class="p-close" id="settingsClose">✕</button></div>
