@@ -46,7 +46,28 @@ function ptagLabel(x){const e=pInfo[x];return e?(e[lang]||e.zh):x;}
 /* ====== 用户态 + 云同步 ====== */
 let userId=null, userEmail=null, favs=new Set(), customRecipes=[], cart=[], profile=null, generated=[], currentFilter='all';
 const syncDot=document.getElementById('syncDot');
-function allRecipes(){return customRecipes.concat(BUILTIN);}
+const SPICY_KW=['辣','麻','泡菜','咖喱','参巴','sambal','kimchi','curry','chili','jalape'];
+function isSpicy(r){const s=((r.name||'')+(r.en||'')+(r.ing||'')+(r.ing_en||'')).toLowerCase();return SPICY_KW.some(k=>s.includes(k));}
+function profileFilter(listArr,prof){
+  if(!prof)return listArr;
+  const avoid=new Set((prof.proteins&&prof.proteins.avoid)||[]);
+  const diet=new Set(prof.diet||[]);
+  const noSpicy=prof.taste&&prof.taste.spicy===0;
+  let out=listArr.filter(r=>{
+    const p=r.p||[];
+    if(p.some(x=>avoid.has(x)))return false;
+    if(diet.has('vegetarian')&&!p.every(x=>x==='tofu'||x==='egg'))return false;
+    if((diet.has('no_pork')||diet.has('halal'))&&p.includes('pork'))return false;
+    if(diet.has('no_seafood')&&p.includes('sea'))return false;
+    if(noSpicy&&isSpicy(r))return false;
+    return true;
+  });
+  const CAP=45;
+  if(out.length>CAP){const step=out.length/CAP,s=[];for(let i=0;i<CAP;i++)s.push(out[Math.floor(i*step)]);out=s;}
+  return out;
+}
+function fullRecipes(){return customRecipes.concat(generated, BUILTIN);}
+function allRecipes(){return customRecipes.concat(generated, profileFilter(BUILTIN, profile));}
 
 let _t;
 function persist(){ if(!userId)return; clearTimeout(_t); _t=setTimeout(syncUp,500); }
@@ -137,17 +158,18 @@ function makeCard(r){
 }
 function render(filter){
   currentFilter=filter;list.innerHTML='';let any=false;
+  const source=(filter==='fav')?fullRecipes():allRecipes();
   if(filter==='fav'){
-    const favCount=allRecipes().filter(r=>favs.has(r.name)).length;
+    const favCount=fullRecipes().filter(r=>favs.has(r.name)).length;
     const b=document.createElement('div');b.className='fav-banner';
     if(favCount===0)b.innerHTML=tr('favEmpty');
     else b.innerHTML=`${trf('favHave',favCount)}<br><button id="favToCart">${tr('favToCart')}</button>`;
     list.appendChild(b);
     const ftc=document.getElementById('favToCart');
-    if(ftc)ftc.addEventListener('click',()=>{allRecipes().filter(r=>favs.has(r.name)).forEach(r=>addIngredientsToCart(recIng(r)));ftc.textContent=tr('favAllAdded');});
+    if(ftc)ftc.addEventListener('click',()=>{fullRecipes().filter(r=>favs.has(r.name)).forEach(r=>addIngredientsToCart(recIng(r)));ftc.textContent=tr('favAllAdded');});
   }
   formatOrder.forEach(cat=>{
-    const items=allRecipes().filter(r=>r.cat===cat && matchFilter(r,filter));
+    const items=source.filter(r=>r.cat===cat && matchFilter(r,filter));
     if(items.length===0)return;any=true;
     const c=formats[cat];
     const label=document.createElement('div');label.className='cat-label';
