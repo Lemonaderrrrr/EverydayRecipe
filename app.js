@@ -96,6 +96,7 @@ async function onAuthed(session){
   renderCart();render('all');
   document.querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));
   document.querySelector('[data-filter="all"]').classList.add('active');
+  if(!profile)showQuiz();
 }
 function showLogin(){document.getElementById('loginOverlay').classList.remove('hidden');setTimeout(()=>document.getElementById('loginEmail').focus(),50);}
 function setMsg(t,err){const m=document.getElementById('loginMsg');m.textContent=t;m.classList.toggle('err',!!err);}
@@ -231,6 +232,87 @@ document.getElementById('setLogout').addEventListener('click',async()=>{
   closePanel(setOv,setP);
   await sb.auth.signOut();userId=null;userEmail=null;favs=new Set();customRecipes=[];cart=[];
   syncDot.textContent='';document.getElementById('loginPw').value='';showLogin();
+});
+
+/* ====== 画像测试 ====== */
+const quizOverlay=document.getElementById('quizOverlay');
+function readChips(q){return [...document.querySelectorAll('.quiz-opts[data-q="'+q+'"] .qchip.on')].map(c=>c.dataset.val);}
+function collectProfile(){
+  const t=readChips('taste');
+  return {
+    v:1,
+    mode:readChips('mode')[0]||'efficient',
+    proteins:{like:readChips('like'),avoid:readChips('avoid')},
+    taste:{spicy:parseInt(readChips('spicy')[0]||'1',10),sweet:t.includes('sweet'),sour:t.includes('sour'),salty:t.includes('salty')},
+    diet:readChips('diet'),
+    cuisines:readChips('cuisines')
+  };
+}
+function prefillQuiz(prof){
+  document.querySelectorAll('.quiz-opts .qchip').forEach(c=>c.classList.remove('on'));
+  if(!prof)return;
+  const set=(q,vals)=>vals.forEach(v=>{const c=document.querySelector('.quiz-opts[data-q="'+q+'"] .qchip[data-val="'+v+'"]');if(c)c.classList.add('on');});
+  set('mode',[prof.mode]);
+  set('like',(prof.proteins&&prof.proteins.like)||[]);
+  set('avoid',(prof.proteins&&prof.proteins.avoid)||[]);
+  set('spicy',[String(prof.taste&&prof.taste.spicy!=null?prof.taste.spicy:1)]);
+  const t=[];if(prof.taste){if(prof.taste.sweet)t.push('sweet');if(prof.taste.sour)t.push('sour');if(prof.taste.salty)t.push('salty');}
+  set('taste',t);
+  set('diet',prof.diet||[]);
+  set('cuisines',prof.cuisines||[]);
+}
+function showQuizLoading(on){
+  document.getElementById('quizLoading').classList.toggle('hidden',!on);
+  document.getElementById('quizBody').style.display=on?'none':'';
+  document.getElementById('quizGo').style.display=on?'none':'';
+}
+function showQuiz(){prefillQuiz(profile);document.getElementById('quizStatus').textContent='';showQuizLoading(false);quizOverlay.classList.remove('hidden');}
+function hideQuiz(){quizOverlay.classList.add('hidden');}
+document.querySelectorAll('.quiz-opts').forEach(box=>{
+  const single=box.dataset.single==='1';
+  box.addEventListener('click',e=>{
+    const chip=e.target.closest('.qchip');if(!chip)return;
+    if(single){box.querySelectorAll('.qchip').forEach(c=>c.classList.remove('on'));chip.classList.add('on');}
+    else chip.classList.toggle('on');
+  });
+});
+async function generateCatalog(prof){
+  const {data:{session}}=await sb.auth.getSession();
+  if(!session)throw new Error('401');
+  const resp=await fetch(`${SUPABASE_URL}/functions/v1/ai-catalog`,{
+    method:'POST',
+    headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token,'apikey':SUPABASE_KEY},
+    body:JSON.stringify({profile:prof})
+  });
+  if(!resp.ok)throw new Error(resp.status===401?'401':'fail');
+  const data=await resp.json();
+  const arr=Array.isArray(data.dishes)?data.dishes:[];
+  const seen=new Set(),clean=[];
+  arr.forEach(o=>{
+    if(!o||!o.name||seen.has(o.name))return;
+    if(!formatOrder.includes(o.cat))return;
+    let p=(Array.isArray(o.p)?o.p:[]).filter(x=>PSET.includes(x));if(p.length===0)p=['tofu'];
+    seen.add(o.name);
+    clean.push({cat:o.cat,sub:o.sub||'',sub_en:o.sub_en||'',name:o.name,en:o.en||'',p,ing:o.ing||'',ing_en:o.ing_en||'',gen:true});
+  });
+  if(clean.length===0)throw new Error('empty');
+  return clean;
+}
+document.getElementById('quizGo').addEventListener('click',async()=>{
+  const prof=collectProfile();
+  document.getElementById('quizStatus').textContent='';
+  showQuizLoading(true);
+  try{
+    const dishes=await generateCatalog(prof);
+    profile=prof;generated=dishes;persist();
+    hideQuiz();
+    document.querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));document.querySelector('[data-filter="all"]').classList.add('active');
+    render('all');
+  }catch(e){
+    showQuizLoading(false);
+    const msg=e.message==='401'?tr('quizExpired'):(e.message==='empty'?tr('quizEmpty'):tr('quizFail'));
+    document.getElementById('quizStatus').textContent=msg;
+  }
 });
 
 /* ====== 菜谱码导出/导入 ====== */
