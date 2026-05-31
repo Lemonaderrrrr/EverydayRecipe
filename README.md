@@ -60,7 +60,7 @@ Supabase 需在后台准备：
 
 ## 🤖 关于 AI 加菜 / About the AI feature
 
-「✨ 一句话加菜谱」需要浏览器能直连 Anthropic API，**仅在能直连的环境（如 Claude 预览）有效**；部署到 GitHub Pages 后浏览器无法直接调用，会提示「网络不可用」。线上启用需自建后端代理（如 Supabase Edge Function / Cloudflare Worker）。登录、收藏、买菜清单的云同步在 GitHub Pages 上正常工作。
+「✨ 一句话加菜谱」需要浏览器能直连 ZHIPU API.
 
 ## 📄 许可证 / License
 
